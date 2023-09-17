@@ -1,2 +1,2 @@
-# Data-_Processing_and_Storage_Course
+# Data Processing and Storage
 Repository for Data Processing and Storage course
