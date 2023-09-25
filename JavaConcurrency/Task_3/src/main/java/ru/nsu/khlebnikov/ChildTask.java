@@ -1,12 +1,13 @@
 package ru.nsu.khlebnikov;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChildTask implements Runnable{
     List<String> inputParameters;
 
     public ChildTask(List<String> inputParameters) {
-        this.inputParameters = inputParameters;
+        this.inputParameters = new ArrayList<>(inputParameters);
     }
 
     @Override

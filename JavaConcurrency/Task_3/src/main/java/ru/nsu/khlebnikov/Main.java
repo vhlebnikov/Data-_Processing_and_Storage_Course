@@ -7,10 +7,13 @@ import java.util.concurrent.Executors;
 
 public class Main {
     public static void main(String[] args) {
-        List<String> strings = new ArrayList<>(List.of("1", "2", "3", "4", "5", "6", "7", "8"));
+        List<String> strings = new ArrayList<>();
         ExecutorService es = Executors.newFixedThreadPool(4);
         for (int i = 0; i < 4; i++) {
-            es.submit(new ChildTask(strings.subList(i * 2, i * 2 + 2)));
+            List<String> data = List.of((2 * i + 1) + " string", (2 * i + 2) + " string");
+            strings.addAll(data);
+            es.submit(new ChildTask(strings));
+            strings.removeAll(data);
         }
         es.shutdown();
     }
