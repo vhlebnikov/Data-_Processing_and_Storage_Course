@@ -18,14 +18,14 @@ public class WorkersFactory {
     private final int numberOfIterations;
     private final int numberOfThreads;
 
-    public WorkersFactory(int numberOfThreads, int numberOfIterations) {
+    public WorkersFactory(int numberOfThreads) {
         executorService = Executors.newFixedThreadPool(numberOfThreads);
-        this.numberOfIterations = numberOfIterations;
+        this.numberOfIterations = 1000000000;
         this.numberOfThreads = numberOfThreads;
     }
 
     /**
-     * Calculate pi value for "countOfIterations" iterations.
+     * Calculate pi value for "numberOfIterations" iterations.
      *
      * @return pi value.
      * @throws InterruptedException if interrupted exception occurred

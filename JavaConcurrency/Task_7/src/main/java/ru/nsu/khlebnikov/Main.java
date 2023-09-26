@@ -2,15 +2,14 @@ package ru.nsu.khlebnikov;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        int numberOfThreads, numberOfIterations;
-        if (args.length != 2) {
-            System.out.println("Number of arguments must equals 2: number of threads and number of iterations!");
+        int numberOfThreads;
+        if (args.length != 1) {
+            System.out.println("Arguments must contain number of threads!");
             return;
         }
         numberOfThreads = Integer.parseInt(args[0]);
-        numberOfIterations = Integer.parseInt(args[1]);
 
-        WorkersFactory workersFactory = new WorkersFactory(numberOfThreads, numberOfIterations);
+        WorkersFactory workersFactory = new WorkersFactory(numberOfThreads);
         System.out.println(workersFactory.calculate());
     }
 }

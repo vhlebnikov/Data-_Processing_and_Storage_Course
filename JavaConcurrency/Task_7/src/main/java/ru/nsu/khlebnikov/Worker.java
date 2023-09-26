@@ -29,6 +29,7 @@ public class Worker implements Callable<Double> {
                 result -= 1 / (2 * i + 1);
             }
         }
+        System.err.println(Thread.currentThread().getId() + " result " + result * 4);
         return result * 4;
     }
 }
