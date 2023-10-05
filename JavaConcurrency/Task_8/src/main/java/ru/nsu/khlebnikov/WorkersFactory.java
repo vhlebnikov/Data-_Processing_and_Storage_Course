@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class that represents factory for distribution work of calculating partial sums
@@ -14,23 +15,31 @@ import java.util.concurrent.Future;
 public class WorkersFactory {
     private final ExecutorService executorService;
     List<Worker> workers = new ArrayList<>();
-    List<Future<Double>> workersResults = new ArrayList<>();
     private final int numberOfIterations;
     private final int numberOfThreads;
+    private static volatile double result;
+    private static volatile boolean stopFlag;
 
-    public WorkersFactory(int numberOfThreads, int numberOfIterations) {
+    public WorkersFactory(int numberOfThreads) {
         executorService = Executors.newFixedThreadPool(numberOfThreads);
-        this.numberOfIterations = numberOfIterations;
+        this.numberOfIterations = 1000000000;
         this.numberOfThreads = numberOfThreads;
+        result = 0;
+        stopFlag = false;
+    }
+
+    public static boolean isStopFlag() {
+        return stopFlag;
+    }
+
+    public static synchronized void addToResult(double value) {
+        result += value;
     }
 
     /**
-     * Calculate pi value for "countOfIterations" iterations.
-     *
-     * @return pi value.
-     * @throws InterruptedException if interrupted exception occurred
+     * Calculate pi value for "numberOfIterations" iterations.
      */
-    public double calculate() throws InterruptedException {
+    public void calculate() {
         int div = numberOfIterations / numberOfThreads;
         int mod = numberOfIterations % numberOfThreads;
 
@@ -43,15 +52,20 @@ public class WorkersFactory {
             start = end;
         }
 
-        workersResults = executorService.invokeAll(workers);
+        workers.forEach(executorService::submit);
         executorService.shutdown();
+    }
 
-        return workersResults.stream().map(x -> {
-            try {
-                return x.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        }).reduce(0d, Double::sum);
+    public void stop() {
+        stopFlag = true;
+        try {
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("Result = " + result);
+        System.out.println("Actual = " + Math.PI);
+        System.out.println("Diff   = " + Math.abs(result - Math.PI));
+
     }
 }

@@ -1,11 +1,9 @@
 package ru.nsu.khlebnikov;
 
-import java.util.concurrent.Callable;
-
 /**
  * Class for calculating partial sum of the Leibniz sequence.
  */
-public class Worker implements Callable<Double> {
+public class Worker implements Runnable {
     private final int from;
     private final int to;
 
@@ -16,19 +14,17 @@ public class Worker implements Callable<Double> {
 
     /**
      * Calculate partial sum of the Leibniz sequence from "from" inclusive to "to" exclusive.
-     *
-     * @return partial sum.
      */
     @Override
-    public Double call() {
+    public void run() {
         double result = 0;
-        for (double i = from; i < to; i++) {
+        for (double i = from; (i < to) && !WorkersFactory.isStopFlag(); i++) {
             if (i % 2 == 0) {
                 result += 1 / (2 * i + 1);
             } else {
                 result -= 1 / (2 * i + 1);
             }
         }
-        return result * 4;
+        WorkersFactory.addToResult(result * 4);
     }
 }
