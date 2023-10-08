@@ -1,11 +1,10 @@
 package ru.nsu.khlebnikov;
 
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Fork {
     private final int id;
-    private final Lock lock;
+    private final ReentrantLock lock;
 
     public Fork(int id) {
         this.id = id;
@@ -16,7 +15,15 @@ public class Fork {
         return id;
     }
 
-    public Lock getLock() {
-        return lock;
+    public void lock() {
+        lock.lock();
+    }
+
+    public void unlock() {
+        lock.unlock();
+    }
+
+    public boolean isLocked() {
+        return lock.isLocked();
     }
 }
