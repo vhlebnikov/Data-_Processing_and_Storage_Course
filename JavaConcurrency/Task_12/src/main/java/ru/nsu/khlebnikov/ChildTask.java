@@ -4,9 +4,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 public class ChildTask implements Callable<Void> {
-    SyncLinkedList<String> syncLinkedList;
+    SyncLinkedList syncLinkedList;
 
-    public ChildTask(SyncLinkedList<String> syncLinkedList) {
+    public ChildTask(SyncLinkedList syncLinkedList) {
         this.syncLinkedList = syncLinkedList;
     }
 
@@ -14,7 +14,7 @@ public class ChildTask implements Callable<Void> {
     public Void call() throws Exception {
         while (true) {
             TimeUnit.SECONDS.sleep(5);
-            syncLinkedList.sort(String::compareTo);
+            syncLinkedList.sort();
         }
     }
 }
