@@ -57,6 +57,7 @@ public class WorkersFactory {
     }
 
     public void stop() {
+        System.out.println("Interrupted");
         stopFlag = true;
         try {
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
