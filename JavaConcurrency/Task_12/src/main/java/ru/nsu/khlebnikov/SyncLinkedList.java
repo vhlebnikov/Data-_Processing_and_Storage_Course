@@ -1,6 +1,5 @@
 package ru.nsu.khlebnikov;
 
-import java.util.Comparator;
 import java.util.LinkedList;
 
 public class SyncLinkedList {
@@ -16,7 +15,8 @@ public class SyncLinkedList {
             for (int j = i + 1; j < length; j++) {
                 if (list.get(i).compareTo(list.get(j)) > 0) {
                     String temp = list.get(i);
-                    list.set()
+                    list.set(i, list.get(j));
+                    list.set(j, temp);
                 }
             }
         }
