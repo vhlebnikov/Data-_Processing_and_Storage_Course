@@ -4,26 +4,47 @@ package ru.nsu.khlebnikov;
  * Class for calculating partial sum of the Leibniz sequence.
  */
 public class Worker implements Runnable {
-    private final int from;
-    private final int to;
+    private double from;
+    private final double to;
+    private double result;
+    private int iterations;
 
     public Worker(int from, int to) {
         this.from = from;
         this.to = to;
+        this.result = 0;
+        this.iterations = 0;
     }
 
-    /**
-     * Calculate partial sum of the Leibniz sequence from "from" inclusive to "to" exclusive.
-     */
     @Override
     public void run() {
-        double result = 0;
-        for (double i = from; (i < to) && !WorkersFactory.isStopFlag(); i++) {
-            if (i % 2 == 0) {
-                result += 1 / (2 * i + 1);
+        for (; (from < to) && !WorkersFactory.isStopFlag(); from++) {
+            if (from % 2 == 0) {
+                result += 1 / (2 * from + 1);
             } else {
-                result -= 1 / (2 * i + 1);
+                result -= 1 / (2 * from + 1);
             }
+            iterations++;
+        }
+        if (WorkersFactory.isStopFlag()) {
+            finishWork();
+        } else {
+            WorkersFactory.addToResult(result * 4);
+            WorkersFactory.setMaxIterations(iterations);
+        }
+    }
+
+    private void finishWork() {
+        WorkersFactory.setMaxIterations(iterations);
+        int maxIterations = WorkersFactory.getMaxIterations();
+        while ((iterations < maxIterations) && (from < to)) {
+            if (from % 2 == 0) {
+                result += 1 / (2 * from + 1);
+            } else {
+                result -= 1 / (2 * from + 1);
+            }
+            iterations++;
+            from++;
         }
         WorkersFactory.addToResult(result * 4);
     }

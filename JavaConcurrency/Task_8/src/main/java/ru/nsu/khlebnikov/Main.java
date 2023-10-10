@@ -7,12 +7,13 @@ public class Main {
             System.out.println("Arguments must contain number of threads!");
             return;
         }
-        numberOfThreads = Integer.parseInt(args[0]);
-
-        WorkersFactory workersFactory = new WorkersFactory(numberOfThreads);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(workersFactory::stop));
-
-        workersFactory.calculate();
+        try {
+            numberOfThreads = Integer.parseInt(args[0]);
+            WorkersFactory workersFactory = new WorkersFactory(numberOfThreads);
+            Runtime.getRuntime().addShutdownHook(new Thread(workersFactory::stop));
+            workersFactory.calculate();
+        } catch (NumberFormatException e) {
+            System.out.println("Argument must be a number");
+        }
     }
 }
