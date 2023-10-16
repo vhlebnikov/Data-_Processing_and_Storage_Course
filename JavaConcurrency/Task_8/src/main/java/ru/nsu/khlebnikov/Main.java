@@ -1,6 +1,6 @@
 package ru.nsu.khlebnikov;
 
-public class Main_Task_8 {
+public class Main {
     public static void main(String[] args) {
         int numberOfThreads;
 
@@ -11,7 +11,7 @@ public class Main_Task_8 {
 
         try {
             numberOfThreads = Integer.parseInt(args[0]);
-            WorkersFactory_Task_8 workersFactory = new WorkersFactory_Task_8(numberOfThreads);
+            WorkersFactory workersFactory = new WorkersFactory(numberOfThreads);
             Runtime.getRuntime().addShutdownHook(new Thread(workersFactory::stop));
             workersFactory.calculate();
         } catch (NumberFormatException e) {

@@ -3,13 +3,13 @@ package ru.nsu.khlebnikov;
 /**
  * Class for calculating partial sum of the Leibniz sequence.
  */
-public class Worker_Task_8 implements Runnable {
+public class Worker implements Runnable {
     private double from;
     private final double to;
     private double result;
     private int iterations;
 
-    public Worker_Task_8(int from, int to) {
+    public Worker(int from, int to) {
         this.from = from;
         this.to = to;
         this.result = 0;
@@ -18,7 +18,7 @@ public class Worker_Task_8 implements Runnable {
 
     @Override
     public void run() {
-        for (; (from < to) && !WorkersFactory_Task_8.isStopFlag(); from++) {
+        for (; (from < to) && !WorkersFactory.isStopFlag(); from++) {
             if (from % 2 == 0) {
                 result += 1 / (2 * from + 1);
             } else {
@@ -27,17 +27,17 @@ public class Worker_Task_8 implements Runnable {
             iterations++;
         }
 
-        if (WorkersFactory_Task_8.isStopFlag()) {
+        if (WorkersFactory.isStopFlag()) {
             finishWork();
         } else {
-            WorkersFactory_Task_8.addToResult(result * 4);
-            WorkersFactory_Task_8.setMaxIterations(iterations);
+            WorkersFactory.addToResult(result * 4);
+            WorkersFactory.setMaxIterations(iterations);
         }
     }
 
     private void finishWork() {
-        WorkersFactory_Task_8.setMaxIterations(iterations);
-        int maxIterations = WorkersFactory_Task_8.getMaxIterations();
+        WorkersFactory.setMaxIterations(iterations);
+        int maxIterations = WorkersFactory.getMaxIterations();
         while ((iterations < maxIterations) && (from < to)) {
             if (from % 2 == 0) {
                 result += 1 / (2 * from + 1);
@@ -47,6 +47,6 @@ public class Worker_Task_8 implements Runnable {
             iterations++;
             from++;
         }
-        WorkersFactory_Task_8.addToResult(result * 4);
+        WorkersFactory.addToResult(result * 4);
     }
 }
