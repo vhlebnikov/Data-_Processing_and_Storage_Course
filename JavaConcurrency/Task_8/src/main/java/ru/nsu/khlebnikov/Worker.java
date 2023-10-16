@@ -26,6 +26,7 @@ public class Worker implements Runnable {
             }
             iterations++;
         }
+
         if (WorkersFactory.isStopFlag()) {
             finishWork();
         } else {

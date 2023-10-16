@@ -62,7 +62,9 @@ public class WorkersFactory {
         } else {
             System.out.println("Successfully finished");
         }
+
         stopFlag = true;
+        
         try {
             executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
