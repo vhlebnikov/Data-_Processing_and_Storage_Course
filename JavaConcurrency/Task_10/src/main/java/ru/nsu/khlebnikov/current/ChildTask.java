@@ -10,15 +10,19 @@ public class ChildTask implements Runnable {
     @Override
     public void run() {
         for (int i = 0; i < 10; i++) {
-            lock.lock();
             try {
-                condition.await();
+                lock.lock();
+                while (Main.mainTurn) {
+                    condition.await();
+                }
+                System.out.println(i + " message from child thread");
+                Main.mainTurn = true;
+                condition.signalAll();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            } finally {
+                lock.unlock();
             }
-            System.out.println(i + " child");
-            condition.signalAll();
-            lock.unlock();
         }
     }
 }
