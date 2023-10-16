@@ -4,8 +4,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.Semaphore;
 
 public class Main {
-    public static volatile Semaphore semaphore1 = new Semaphore(1);
-    public static volatile Semaphore semaphore2 = new Semaphore(0);
+    public static Semaphore semaphore1 = new Semaphore(1);
+    public static Semaphore semaphore2 = new Semaphore(0);
 
     public static void main(String[] args) throws InterruptedException {
         Thread childThread = new Thread(new FutureTask<>(new ChildTask()));
