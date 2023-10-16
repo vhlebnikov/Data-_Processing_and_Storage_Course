@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
  * Class that represents factory for distribution work of calculating partial sums
  * between provided thread and obtaining the final result (pi value).
  */
-public class WorkersFactory {
+public class WorkersFactory_Task_8 {
     private final ExecutorService executorService;
-    List<Worker> workers = new ArrayList<>();
+    List<Worker_Task_8> workers = new ArrayList<>();
     private final int numberOfIterations;
     private final int numberOfThreads;
     private static volatile double result;
@@ -21,7 +21,7 @@ public class WorkersFactory {
     private static volatile int maxIterations;
     private static CountDownLatch countDownLatch;
 
-    public WorkersFactory(int numberOfThreads) {
+    public WorkersFactory_Task_8(int numberOfThreads) {
         executorService = Executors.newFixedThreadPool(numberOfThreads);
         this.numberOfIterations = 1000000000;
         this.numberOfThreads = numberOfThreads;
@@ -48,7 +48,7 @@ public class WorkersFactory {
 
         for (int i = 0; i < numberOfThreads; i++) {
             end = mod-- > 0 ? start + div + 1 : start + div;
-            workers.add(new Worker(start, end));
+            workers.add(new Worker_Task_8(start, end));
             start = end;
         }
 
