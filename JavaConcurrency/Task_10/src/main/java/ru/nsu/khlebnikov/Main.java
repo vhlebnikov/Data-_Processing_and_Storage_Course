@@ -1,17 +1,14 @@
 package ru.nsu.khlebnikov;
 
 public class Main {
-    public static final Object lock = new Object();
+    public static final Object mainLock = new Object();
+    public static final Object childLock = new Object();
 
     public static void main(String[] args) throws InterruptedException {
+        Thread mainThread = new Thread(new MainTask());
         Thread childThread = new Thread(new ChildTask());
         childThread.start();
-        for (int i = 0; i < 10; i++){
-            synchronized (lock) {
-                System.out.println(i + " message from main thread");
-                lock.wait();
-                lock.notify();
-            }
-        }
+        Thread.sleep(500);
+        mainThread.start();
     }
 }

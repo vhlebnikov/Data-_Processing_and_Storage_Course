@@ -1,16 +1,26 @@
 package ru.nsu.khlebnikov;
 
 public class ChildTask implements Runnable {
-    final Object lock = Main.lock;
+    private final Object mainLock = Main.mainLock;
+    private final Object childLock = Main.childLock;
 
     @Override
     public void run() {
+        synchronized (childLock) {
+            try {
+                childLock.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
         for (int i = 0; i < 10; i++) {
-            synchronized (lock) {
+            synchronized (childLock) {
                 System.out.println(i + " message from child thread");
-                lock.notify();
+                synchronized (mainLock) {
+                    mainLock.notify();
+                }
                 try {
-                    lock.wait();
+                    childLock.wait();
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
