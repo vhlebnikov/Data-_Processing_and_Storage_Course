@@ -1,4 +1,4 @@
-package ru.nsu.khlebnikov;
+package ru.nsu.khlebnikov.old;
 
 public class Main {
     public static final Object mainLock = new Object();

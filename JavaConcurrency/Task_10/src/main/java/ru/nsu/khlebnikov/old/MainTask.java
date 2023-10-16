@@ -1,4 +1,6 @@
-package ru.nsu.khlebnikov;
+package ru.nsu.khlebnikov.old;
+
+import ru.nsu.khlebnikov.old.Main;
 
 public class MainTask implements Runnable {
     private final Object mainLock = Main.mainLock;

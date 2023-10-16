@@ -1,4 +1,4 @@
-package ru.nsu.khlebnikov;
+package ru.nsu.khlebnikov.old;
 
 public class ChildTask implements Runnable {
     private final Object mainLock = Main.mainLock;
