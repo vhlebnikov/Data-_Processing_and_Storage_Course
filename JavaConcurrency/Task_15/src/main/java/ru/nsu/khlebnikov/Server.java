@@ -44,7 +44,7 @@ public class Server {
                 System.out.println("Client response: " + clientResponse);
                 proxyOut.write(clientResponse + '\n');
                 proxyOut.flush();
-
+                
                 String proxyResponse = proxyIn.readLine();
                 System.out.println("Proxy response: " + proxyResponse);
                 clientOut.write(proxyResponse + '\n');
