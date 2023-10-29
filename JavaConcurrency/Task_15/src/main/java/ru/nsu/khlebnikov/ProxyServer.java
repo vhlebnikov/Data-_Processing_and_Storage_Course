@@ -1,60 +1,78 @@
 package ru.nsu.khlebnikov;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.SQLOutput;
+import java.net.SocketException;
+import java.nio.channels.Selector;
 
-public class ProxyServer {
-    private static String host;
-    private static int port;
-    private static ServerSocket proxySocket;
-    private static Socket serverSocket;
-    private static BufferedReader in;
-    private static BufferedWriter out;
+public class Server {
+    private static ServerSocket serverSocket;
+    private static Socket clientSocket;
+    private static Socket proxySocket;
+    private static BufferedReader clientIn;
+    private static BufferedWriter clientOut;
+    private static BufferedReader proxyIn;
+    private static BufferedWriter proxyOut;
 
-    public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("<proxy_host> <proxy_port>");
+    public static void main(String[] args) throws IOException {
+        if (args.length != 3) {
+            System.out.println("<server_port> <proxy_host> <proxy_port>");
             return;
         }
-
-        host = args[0];
-        port = Integer.parseInt(args[1]);
-        InetSocketAddress address = new InetSocketAddress(host, port);
+        Selector selector = Selector.open();
+        int serverPort = Integer.parseInt(args[0]);
+        String proxyHost = args[1];
+        int proxyPort = Integer.parseInt(args[2]);
 
         try {
-            proxySocket = new ServerSocket();
-            proxySocket.bind(address);
-            System.out.println("Listening on port " + port + " and host " + host);
+            serverSocket = new ServerSocket(serverPort);
+            System.out.println("Listening on port " + serverPort + " and forwarding to " + proxyHost + ":" + proxyPort);
 
-            try {
-                serverSocket = proxySocket.accept();
-                in = new BufferedReader(new InputStreamReader(serverSocket.getInputStream()));
-                out = new BufferedWriter(new OutputStreamWriter(serverSocket.getOutputStream()));
+            clientSocket = serverSocket.accept();
+            System.out.println("Accepted connection from " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 
-                while (true) {
-                    String clientIn = in.readLine();
-                    System.out.println("Message from " + serverSocket.getInetAddress() + ":" + serverSocket.getPort() +
-                            " = " + clientIn);
-                    if (clientIn.equals("stop")) {
-                        out.write("I will disconnect ASAP" + '\n');
-                        out.flush();
-                        break;
-                    }
-                    out.write("You entered: " + clientIn + '\n');
-                    out.flush();
-                }
-            } finally {
-                in.close();
-                out.close();
-                serverSocket.close();
-                proxySocket.close();
-                System.out.println("Proxy server was disconnected");
+            proxySocket = new Socket(proxyHost, proxyPort);
+            System.out.println("Connected to proxy: " + proxyHost + ":" + proxyPort);
+
+            clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            clientOut = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            proxyIn = new BufferedReader(new InputStreamReader(proxySocket.getInputStream()));
+            proxyOut = new BufferedWriter(new OutputStreamWriter(proxySocket.getOutputStream()));
+
+            while (true) {
+                String clientResponse = clientIn.readLine();
+                System.out.println("Client response: " + clientResponse);
+                proxyOut.write(clientResponse + '\n');
+                proxyOut.flush();
+                
+                String proxyResponse = proxyIn.readLine();
+                System.out.println("Proxy response: " + proxyResponse);
+                clientOut.write(proxyResponse + '\n');
+                clientOut.flush();
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (SocketException e) {
+            System.out.println("Server was disconnected");
+        } finally {
+            serverSocket.close();
+            if (clientSocket != null && clientSocket.isConnected()) {
+                if (clientIn != null) {
+                    clientIn.close();
+                }
+                if (clientOut != null) {
+                    clientOut.close();
+                }
+                clientSocket.close();
+            }
+            if (proxySocket != null && proxySocket.isConnected()) {
+                if (proxyIn != null) {
+                    proxyIn.close();
+                }
+                if (proxyOut != null) {
+                    proxyOut.close();
+                }
+                proxySocket.close();
+            }
         }
     }
 }
