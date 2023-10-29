@@ -1,15 +1,19 @@
 package ru.nsu.khlebnikov;
 
-import java.io.*;
-import java.net.Socket;
-import java.net.SocketException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 public class Client {
-    private static Socket clientSocket;
+    private static SocketChannel clientSocketChannel;
+    private static ByteBuffer buffer;
     private static BufferedReader reader;
-    private static BufferedReader in;
-    private static BufferedWriter out;
-    private static String userInput;
+    private static String userInput = "";
+    private static final int BUFFER_SIZE = 2048;
 
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -21,34 +25,48 @@ public class Client {
 
         try {
             try {
-                clientSocket = new Socket("127.0.0.1", serverPort);
+                InetSocketAddress inetSocketAddress = new InetSocketAddress(InetAddress.getLocalHost(), serverPort);
+                clientSocketChannel = SocketChannel.open(inetSocketAddress);
                 reader = new BufferedReader(new InputStreamReader(System.in));
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 
-                while (true) {
+                System.out.println("Hello! You've connected to the server");
+
+                boolean exitFlag = false;
+
+                while (!exitFlag) {
                     System.out.print("Enter your message: ");
-                    userInput = reader.readLine();
-                    out.write(userInput + '\n');
-                    out.flush();
-
-                    String serverResponse = in.readLine();
-                    System.out.println("Server response: " + serverResponse);
-                    if (userInput.equals("stop")) {
-                        break;
+                    while (userInput.isEmpty()) {
+                        userInput = reader.readLine();
                     }
+
+                    if (userInput.equals("stop")) {
+                        exitFlag = true;
+                    }
+
+                    buffer = ByteBuffer.allocate(BUFFER_SIZE);
+                    buffer.put(userInput.getBytes());
+                    userInput = "";
+                    buffer.flip();
+                    clientSocketChannel.write(buffer);
+
+                    buffer.clear();
+                    clientSocketChannel.read(buffer);
+                    buffer.flip();
+                    System.out.println("Server response: " + new String(buffer.array()).trim());
                 }
-            } catch (SocketException e) {
+            } catch (IOException e) {
                 System.out.println("Server was disconnected from you");
             } finally {
-                reader.close();
-                in.close();
-                out.close();
-                clientSocket.close();
+                if (clientSocketChannel != null) {
+                    clientSocketChannel.close();
+                }
+                if (reader != null) {
+                    reader.close();
+                }
                 System.out.println("Client was disconnected");
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Can't close channels");
         }
     }
 }

@@ -1,78 +1,117 @@
 package ru.nsu.khlebnikov;
 
-import java.io.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
 
-public class Server {
-    private static ServerSocket serverSocket;
-    private static Socket clientSocket;
-    private static Socket proxySocket;
-    private static BufferedReader clientIn;
-    private static BufferedWriter clientOut;
-    private static BufferedReader proxyIn;
-    private static BufferedWriter proxyOut;
+public class ProxyServer {
+    private static Selector selector;
+    private static ServerSocketChannel proxySocketChannel;
+    private static ServerSocket proxySocket;
+    private static SocketChannel serverSocketChannel;
+    private static final int BUFFER_SIZE = 2048;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         if (args.length != 3) {
-            System.out.println("<server_port> <proxy_host> <proxy_port>");
+            System.out.println("<proxy_port> <server_host> <server_port>");
             return;
         }
-        Selector selector = Selector.open();
-        int serverPort = Integer.parseInt(args[0]);
-        String proxyHost = args[1];
-        int proxyPort = Integer.parseInt(args[2]);
+
+        int proxyPort = Integer.parseInt(args[0]);
+        String serverHost = args[1];
+        int serverPort = Integer.parseInt(args[2]);
 
         try {
-            serverSocket = new ServerSocket(serverPort);
-            System.out.println("Listening on port " + serverPort + " and forwarding to " + proxyHost + ":" + proxyPort);
+            try {
+                selector = Selector.open();
 
-            clientSocket = serverSocket.accept();
-            System.out.println("Accepted connection from " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
+                InetSocketAddress proxyAddress = new InetSocketAddress(InetAddress.getLocalHost(), proxyPort);
+                proxySocketChannel = ServerSocketChannel.open();
+                proxySocket = proxySocketChannel.socket();
+                proxySocket.bind(proxyAddress);
+                System.out.println("Proxy server started at: " + proxySocketChannel.getLocalAddress());
 
-            proxySocket = new Socket(proxyHost, proxyPort);
-            System.out.println("Connected to proxy: " + proxyHost + ":" + proxyPort);
+                proxySocketChannel.configureBlocking(false);
+                proxySocketChannel.register(selector, proxySocketChannel.validOps());
 
-            clientIn = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            clientOut = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-            proxyIn = new BufferedReader(new InputStreamReader(proxySocket.getInputStream()));
-            proxyOut = new BufferedWriter(new OutputStreamWriter(proxySocket.getOutputStream()));
+                InetSocketAddress serverAddress = new InetSocketAddress(serverHost, serverPort);
+                serverSocketChannel = SocketChannel.open(serverAddress);
+                System.out.println("Connected to server: " + serverSocketChannel.getRemoteAddress());
 
-            while (true) {
-                String clientResponse = clientIn.readLine();
-                System.out.println("Client response: " + clientResponse);
-                proxyOut.write(clientResponse + '\n');
-                proxyOut.flush();
-                
-                String proxyResponse = proxyIn.readLine();
-                System.out.println("Proxy response: " + proxyResponse);
-                clientOut.write(proxyResponse + '\n');
-                clientOut.flush();
+                while (selector.select() > 0) {
+                    Set<SelectionKey> selectionKeys = selector.selectedKeys();
+                    Iterator<SelectionKey> iterator = selectionKeys.iterator();
+
+                    while (iterator.hasNext()) {
+                        SelectionKey key = iterator.next();
+                        iterator.remove();
+
+                        if (!key.isValid()) {
+                            continue;
+                        }
+                        if (key.isAcceptable()) {
+                            SocketChannel client = proxySocketChannel.accept();
+                            System.out.println("Client " + client.getRemoteAddress() + " connected");
+                            client.configureBlocking(false);
+                            client.register(selector, SelectionKey.OP_READ);
+                        } else if (key.isReadable()) {
+                            ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
+                            SocketChannel client = (SocketChannel) key.channel();
+
+                            client.read(buffer);
+                            String message = new String(buffer.array()).trim();
+                            System.out.println("Message: " + message + " from client: " + client.getRemoteAddress() +
+                                    " to server: " + serverSocketChannel.getRemoteAddress());
+                            if (message.equals("stop") || message.isEmpty()) {
+                                buffer.clear();
+                                buffer.put(("Client " + client.getRemoteAddress() + " was disconnected").getBytes());
+                            }
+                            buffer.flip();
+                            serverSocketChannel.write(buffer);
+
+                            buffer.clear();
+                            buffer = ByteBuffer.allocate(BUFFER_SIZE);
+                            serverSocketChannel.read(buffer);
+                            message = new String(buffer.array()).trim();
+                            System.out.println("Message: " + message + " from server: " +
+                                    serverSocketChannel.getRemoteAddress() +
+                                    " to client: " + client.getRemoteAddress());
+                            buffer.flip();
+                            client.write(buffer);
+
+                            if (message.equals("stop")) {
+                                System.out.println("Client " + client.getRemoteAddress() + " was disconnected");
+                                client.close();
+                            }
+                        }
+                    }
+                }
+            } finally {
+                if (proxySocket != null) {
+                    proxySocket.close();
+                }
+                if (serverSocketChannel != null) {
+                    serverSocketChannel.close();
+                }
+                if (selector != null) {
+                    selector.close();
+                }
             }
-        } catch (SocketException e) {
-            System.out.println("Server was disconnected");
-        } finally {
-            serverSocket.close();
-            if (clientSocket != null && clientSocket.isConnected()) {
-                if (clientIn != null) {
-                    clientIn.close();
-                }
-                if (clientOut != null) {
-                    clientOut.close();
-                }
-                clientSocket.close();
+        } catch (IOException e) {
+            if (e.getMessage().equals("Connection reset by peer")) {
+                System.out.println("Server was disconnected");
+            } else {
+                throw new RuntimeException(e);
             }
-            if (proxySocket != null && proxySocket.isConnected()) {
-                if (proxyIn != null) {
-                    proxyIn.close();
-                }
-                if (proxyOut != null) {
-                    proxyOut.close();
-                }
-                proxySocket.close();
-            }
+
         }
     }
 }
