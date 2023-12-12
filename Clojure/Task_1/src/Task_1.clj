@@ -2,19 +2,20 @@
 (require '[clojure.string :as str])
 
 ; вернуть символы из алфавита, кроме того, который является последним в слове
-(defn possibleSymbols [word alphabet]
+(defn possible-symbols [word alphabet]
   (filter #(not (str/ends-with? word %)) alphabet))
 
 ; возвращает слова составленные из допустимых символов и переданного слова
-(defn makeWords [word alphabet]
-  (map #(str word %) (possibleSymbols word alphabet)))
+(defn make-words [word alphabet]
+  (map #(str word %) (possible-symbols word alphabet)))
 
 ; возвращает список новых слов составленных из слов в wordList
 ; (для каждого слова отсюда составляет новые слова)
-(defn makeList [wordList alphabet]
-  (reduce concat (map #(makeWords % alphabet) wordList)))
+(defn make-list [wordList alphabet]
+  (reduce concat (map #(make-words % alphabet) wordList)))
 
 ; N раз вызывает функцию makeList для первоначального списка, состоящего из пустого символа
 (defn main [N alphabet]
-  (reduce (fn [l, _] (makeList l alphabet)) (list "") (range N)))
-(print (main 2 '("a" "b" "c"))) ; => (ab ac ba bc ca cb)
+  (reduce (fn [l, _] (make-list l alphabet)) (list "") (range N)))
+(print (main 3 '("a" "b" "c")))
+; => (aba abc aca acb bab bac bca bcb cab cac cba cbc)
