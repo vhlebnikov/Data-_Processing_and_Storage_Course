@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<people count="32742">
+    <person id="P397288">
+        <wife value="P397949"/>
+    </person>
+    <person id="P397018">
+        <mother>Gita Schnetter</mother>
+        <siblings val="P397019 P397012"/>
+    </person>
+    <person>
+        <id value="P397288"/>
+        <siblings val="P407730"/>
+        <fullname>
+            <first>Lexie</first>
+            <family>Zaic</family>
+        </fullname>
+        <surname value="Zaic"/>
+    </person>
+    <person>
+        <father>Ezra Turay</father>
+        <fullname>
+            <first>Freda</first>
+            <family>Rabassa</family>
+        </fullname>
+        <firstname>Freda </firstname>
+        <gender value="female"/>
+    </person>
+</people>
