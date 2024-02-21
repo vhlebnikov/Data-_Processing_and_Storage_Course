@@ -1,21 +1,35 @@
 package ru.nsu.khlebnikov;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Persons {
     private final List<Person> persons;
-    private final int count;
+    private final int initialCount;
 
-    public Persons(int count) {
+    public Persons(int initialCount) {
         this.persons = new ArrayList<>();
-        this.count = count;
+        this.initialCount = initialCount;
     }
 
-    // добавление персона
-    // изменение
-    // замена
-    // подсчёт можно
+    public void addPerson(Person person) {
+        Person existingPerson = persons.stream().filter(p -> p.equals(person)).findFirst().orElse(null);
+        if (existingPerson != null) {
+            existingPerson.merge(person);
+        } else {
+            persons.add(person);
+        }
+    }
+
+    public int getInitialCount() {
+        return initialCount;
+    }
+
+    public int getPersonsCount() {
+        return persons.size();
+    }
+
+    public List<Person> getPersons() {
+        return persons;
+    }
 }

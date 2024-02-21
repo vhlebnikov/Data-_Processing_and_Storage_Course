@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PersonParser {
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -104,7 +105,8 @@ public class PersonParser {
                                 }
                             }
                             case "father", "mother", "children", "sister", "brother",
-                                    "family-name", "fullname", "family", "first", "child" -> {}
+                                    "family-name", "fullname", "family", "first", "child" -> {
+                            }
                             case "son", "daughter" -> {
                                 Attribute attribute =
                                         event.asStartElement().getAttributeByName(QName.valueOf("id"));
@@ -138,10 +140,123 @@ public class PersonParser {
                         }
                     }
                     if (event.isEndElement() && event.asEndElement().getName().getLocalPart().equals("person")) {
-                        // id
+                        // тут логика с унификацией данных каждого поля
+                        Person newPerson = new Person();
 
+                        if (values.containsKey("id")) {
+                            List<String> ids = values.get("id").stream().map(String::trim).toList();
+                            if (!ids.stream().allMatch(ids.get(0)::equals)) {
+                                throw new IllegalStateException("Person can't have two different ids");
+                            }
+                            newPerson.setId(values.get("id").get(0));
+                        }
+                        if (values.containsKey("name")) {
+                            String name = values.get("name").get(0).trim();
+                            String firstname = name.split(" ")[0];
+                            String surname = name.split(" ")[1];
+                            newPerson.setFirstname(firstname);
+                            newPerson.setSurname(surname);
+                        }
+                        if (values.containsKey("parent")) {
+                            List<String> parents = values.get("parent").stream().map(String::trim).toList();
+                            parents.forEach(p -> {
+                                Person parent = new Person();
+                                parent.setId(p);
+                                newPerson.addParent(parent);
+                            });
+                        }
+                        if (values.containsKey("spouce")) {
+                            String spouceName = values.get("spouce").get(0).trim();
+                            String firstname = spouceName.split(" ")[0];
+                            String surname = spouceName.split(" ")[1];
+                            Person spouce = new Person();
+                            spouce.setFirstname(firstname);
+                            spouce.setSurname(surname);
+                            newPerson.setSpouce(spouce);
+                        }
+                        if (values.containsKey("siblings")) {
+                            List<String> siblingsIds = List.of(values.get("siblings").get(0).trim().split(" "));
+                            siblingsIds.forEach(s -> {
+                                Person sibling = new Person();
+                                sibling.setId(s);
+                                newPerson.addSibling(sibling);
+                            });
+                        }
+                        if (values.containsKey("firstname")) {
+                            List<String> firstnames = values.get("firstname").stream().map(String::trim).toList();
+                            if (firstnames.size() >= 2 && !firstnames.stream().allMatch(firstnames.get(0)::equals)) {
+                                throw new IllegalStateException("Ids must be equal");
+                            }
+                            if (newPerson.getFirstname() != null && !newPerson.getFirstname().equals(firstnames.get(0))) {
+                                throw new IllegalStateException("Different firstnames for one person");
+                            }
+                            newPerson.setFirstname(firstnames.get(0));
+                        }
+                        if (values.containsKey("gender")) {
+                            List<String> genders = values.get("gender").stream().map(String::trim).toList();
+                            if (genders.size() >= 2) {
+                                throw new IllegalStateException("Person can't have two genders, but in our time all is possible");
+                            }
+                            // Вот этот момент возможно лучше облегчить (сделать только для одного элемента)
+                            genders = genders.stream().map(g ->
+                                            Objects.equals(g, "F") ? g = "female" :
+                                                    (Objects.equals(g, "M") ? g = "male" : g)).toList();
+                            newPerson.setGender(genders.get(0));
+                        }
+                        if (values.containsKey("husband")) {
+
+                        }
+                        if (values.containsKey("surname")) {
+
+                        }
+                        if (values.containsKey("wife")) {
+
+                        }
+                        if (values.containsKey("siblings-number")) {
+                            // подумать
+                        }
+                        if (values.containsKey("children-number")) {
+                            // подумать
+                        }
+                        if (values.containsKey("father")) {
+
+                        }
+                        if (values.containsKey("mother")) {
+
+                        }
+                        if (values.containsKey("children")) {
+
+                        }
+                        if (values.containsKey("sister")) {
+
+                        }
+                        if (values.containsKey("brother")) {
+
+                        }
+                        if (values.containsKey("family-name")) {
+
+                        }
+                        if (values.containsKey("fullname")) {
+
+                        }
+                        if (values.containsKey("family")) {
+
+                        }
+                        if (values.containsKey("first")) {
+
+                        }
+                        if (values.containsKey("child")) {
+
+                        }
+                        if (values.containsKey("son")) {
+
+                        }
+                        if (values.containsKey("daughter")) {
+
+                        }
 
                         // логика добавления одного person'а ко всем чувакам
+                        persons.addPerson(newPerson);
                         values = null;
                     }
                 }
@@ -151,5 +266,9 @@ public class PersonParser {
         } catch (XMLStreamException | FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Persons getPersons() {
+        return persons;
     }
 }
