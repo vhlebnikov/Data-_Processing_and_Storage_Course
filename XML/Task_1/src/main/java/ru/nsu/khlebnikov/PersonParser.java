@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class PersonParser {
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
@@ -144,21 +145,20 @@ public class PersonParser {
                         Person newPerson = new Person();
 
                         if (values.containsKey("id")) {
-                            List<String> ids = values.get("id").stream().map(String::trim).toList();
-                            if (!ids.stream().allMatch(ids.get(0)::equals)) {
-                                throw new IllegalStateException("Person can't have two different ids");
-                            }
-                            newPerson.setId(values.get("id").get(0));
+                            List<String> ids = values.get("id").stream().map(String::trim).distinct().toList();
+                            ids.forEach(newPerson::setId);
                         }
                         if (values.containsKey("name")) {
                             String name = values.get("name").get(0).trim();
-                            String firstname = name.split(" ")[0];
-                            String surname = name.split(" ")[1];
+                            String[] fullName = name.split(" ");
+                            String firstname = fullName[0];
+                            String surname = fullName[1];
                             newPerson.setFirstname(firstname);
                             newPerson.setSurname(surname);
                         }
                         if (values.containsKey("parent")) {
-                            List<String> parents = values.get("parent").stream().map(String::trim).toList();
+                            List<String> parents =
+                                    values.get("parent").stream().map(String::trim).distinct().toList();
                             parents.forEach(p -> {
                                 Person parent = new Person();
                                 parent.setId(p);
@@ -166,51 +166,62 @@ public class PersonParser {
                             });
                         }
                         if (values.containsKey("spouce")) {
-                            String spouceName = values.get("spouce").get(0).trim();
-                            String firstname = spouceName.split(" ")[0];
-                            String surname = spouceName.split(" ")[1];
-                            Person spouce = new Person();
-                            spouce.setFirstname(firstname);
-                            spouce.setSurname(surname);
-                            newPerson.setSpouce(spouce);
+                            List<String> spoucesNames = values.get("spouce").stream().map(String::trim).distinct().toList();
+                            spoucesNames.forEach(s -> {
+                                String[] fullName = s.split(" ");
+                                String firstname = fullName[0];
+                                String surname = fullName[1];
+                                Person spouce = new Person();
+                                spouce.setFirstname(firstname);
+                                spouce.setSurname(surname);
+                                newPerson.setSpouce(spouce);
+                            });
                         }
                         if (values.containsKey("siblings")) {
-                            List<String> siblingsIds = List.of(values.get("siblings").get(0).trim().split(" "));
-                            siblingsIds.forEach(s -> {
-                                Person sibling = new Person();
-                                sibling.setId(s);
-                                newPerson.addSibling(sibling);
+                            List<String> siblings = values.get("siblings").stream().map(String::trim).distinct().toList();
+                            siblings.forEach(x -> {
+                                List<String> siblingsIds = Stream.of(x.split(" ")).distinct().toList();
+                                siblingsIds.forEach(s -> {
+                                    Person sibling = new Person();
+                                    sibling.setId(s);
+                                    newPerson.addSibling(sibling);
+                                });
                             });
                         }
                         if (values.containsKey("firstname")) {
-                            List<String> firstnames = values.get("firstname").stream().map(String::trim).toList();
-                            if (firstnames.size() >= 2 && !firstnames.stream().allMatch(firstnames.get(0)::equals)) {
-                                throw new IllegalStateException("Ids must be equal");
-                            }
-                            if (newPerson.getFirstname() != null && !newPerson.getFirstname().equals(firstnames.get(0))) {
-                                throw new IllegalStateException("Different firstnames for one person");
-                            }
-                            newPerson.setFirstname(firstnames.get(0));
+                            List<String> firstnames =
+                                    values.get("firstname").stream().map(String::trim).distinct().toList();
+                            firstnames.forEach(newPerson::setFirstname);
                         }
                         if (values.containsKey("gender")) {
                             List<String> genders = values.get("gender").stream().map(String::trim).toList();
-                            if (genders.size() >= 2) {
-                                throw new IllegalStateException("Person can't have two genders, but in our time all is possible");
-                            }
-                            // Вот этот момент возможно лучше облегчить (сделать только для одного элемента)
                             genders = genders.stream().map(g ->
-                                            Objects.equals(g, "F") ? g = "female" :
-                                                    (Objects.equals(g, "M") ? g = "male" : g)).toList();
-                            newPerson.setGender(genders.get(0));
+                                    Objects.equals(g, "F") ? g = "female" :
+                                            (Objects.equals(g, "M") ? g = "male" : g)).distinct().toList();
+                            genders.forEach(newPerson::setGender);
                         }
                         if (values.containsKey("husband")) {
-
+                            List<String> husbandsIds =
+                                    values.get("husband").stream().map(String::trim).distinct().toList();
+                            husbandsIds.forEach(h -> {
+                                Person husband = new Person();
+                                husband.setId(h);
+                                newPerson.setHusband(husband);
+                            });
                         }
                         if (values.containsKey("surname")) {
-
+                            List<String> surnames =
+                                    values.get("surname").stream().map(String::trim).distinct().toList();
+                            surnames.forEach(newPerson::setSurname);
                         }
                         if (values.containsKey("wife")) {
-
+                            List<String> wifesIds =
+                                    values.get("wife").stream().map(String::trim).distinct().toList();
+                            wifesIds.forEach(w -> {
+                                Person wife = new Person();
+                                wife.setId(w);
+                                newPerson.setWife(wife);
+                            });
                         }
                         if (values.containsKey("siblings-number")) {
                             // подумать
@@ -219,40 +230,101 @@ public class PersonParser {
                             // подумать
                         }
                         if (values.containsKey("father")) {
-
+                            List<String> fathers =
+                                    values.get("father").stream().map(String::trim).distinct().toList();
+                            fathers.forEach(f -> {
+                                String[] fullName = f.split(" ");
+                                String firstname = fullName[0];
+                                String surname = fullName[1];
+                                Person father = new Person();
+                                father.setFirstname(firstname);
+                                father.setSurname(surname);
+                                newPerson.setFather(father);
+                            });
                         }
                         if (values.containsKey("mother")) {
-
-                        }
-                        if (values.containsKey("children")) {
-
+                            List<String> mothers =
+                                    values.get("mother").stream().map(String::trim).distinct().toList();
+                            mothers.forEach(f -> {
+                                String[] fullName = f.split(" ");
+                                String firstname = fullName[0];
+                                String surname = fullName[1];
+                                Person mother = new Person();
+                                mother.setFirstname(firstname);
+                                mother.setSurname(surname);
+                                newPerson.setMother(mother);
+                            });
                         }
                         if (values.containsKey("sister")) {
-
+                            List<String> sisters =
+                                    values.get("sister").stream().map(String::trim).distinct().toList();
+                            sisters.forEach(s -> {
+                                String[] fullName = s.split(" ");
+                                String firstname = fullName[0];
+                                String surname = fullName[1];
+                                Person sister = new Person();
+                                sister.setFirstname(firstname);
+                                sister.setSurname(surname);
+                                newPerson.addSister(sister);
+                            });
                         }
                         if (values.containsKey("brother")) {
-
+                            List<String> brothers =
+                                    values.get("brother").stream().map(String::trim).distinct().toList();
+                            brothers.forEach(b -> {
+                                String[] fullName = b.split(" ");
+                                String firstname = fullName[0];
+                                String surname = fullName[1];
+                                Person brother = new Person();
+                                brother.setFirstname(firstname);
+                                brother.setSurname(surname);
+                                newPerson.addBrother(brother);
+                            });
                         }
                         if (values.containsKey("family-name")) {
-
-                        }
-                        if (values.containsKey("fullname")) {
-
+                            List<String> familyNames =
+                                    values.get("family-names").stream().map(String::trim).distinct().toList();
+                            familyNames.forEach(newPerson::setSurname);
                         }
                         if (values.containsKey("family")) {
-
+                            List<String> familyNames =
+                                    values.get("family").stream().map(String::trim).distinct().toList();
+                            familyNames.forEach(newPerson::setSurname);
                         }
                         if (values.containsKey("first")) {
-
+                            List<String> firstnames =
+                                    values.get("first").stream().map(String::trim).distinct().toList();
+                            firstnames.forEach(newPerson::setFirstname);
                         }
                         if (values.containsKey("child")) {
-
+                            List<String> children =
+                                    values.get("child").stream().map(String::trim).distinct().toList();
+                            children.forEach(c -> {
+                                String[] fullName = c.split(" ");
+                                String firstname = fullName[0];
+                                String surname = fullName[1];
+                                Person child = new Person();
+                                child.setFirstname(firstname);
+                                child.setSurname(surname);
+                                newPerson.addChild(child);
+                            });
                         }
                         if (values.containsKey("son")) {
-
+                            List<String> sonsIds = values.get("son").stream().map(String::trim).distinct().toList();
+                            sonsIds.forEach(s -> {
+                                Person son = new Person();
+                                son.setId(s);
+                                newPerson.addSon(son);
+                            });
                         }
                         if (values.containsKey("daughter")) {
-
+                            List<String> daughtersIds =
+                                    values.get("daughter").stream().map(String::trim).distinct().toList();
+                            daughtersIds.forEach(d -> {
+                                Person daughter = new Person();
+                                daughter.setId(d);
+                                newPerson.addDaughter(daughter);
+                            });
                         }
 
                         // логика добавления одного person'а ко всем чувакам

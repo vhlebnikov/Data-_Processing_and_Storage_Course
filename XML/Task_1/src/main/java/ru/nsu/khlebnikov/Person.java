@@ -34,18 +34,30 @@ public class Person {
     }
 
     public void setId(String id) {
+        if (this.id != null && !this.id.equals(id)) {
+            throw new IllegalStateException("Different data ID: " + this.id + " != " + id);
+        }
         this.id = id;
     }
 
     public void setFirstname(String firstname) {
+        if (this.firstname != null && !this.firstname.equals(firstname)) {
+            throw new IllegalStateException("Different data FIRSTNAME: " + this.firstname + " != " + firstname);
+        }
         this.firstname = firstname;
     }
 
     public void setSurname(String surname) {
+        if (this.surname != null && !this.surname.equals(surname)) {
+            throw new IllegalStateException("Different data SURNAME: " + this.surname + " != " + surname);
+        }
         this.surname = surname;
     }
 
     public void setGender(String gender) {
+        if (this.gender != null && !this.gender.equals(gender)) {
+            throw new IllegalStateException("Different data GENDER: " + this.gender + " != " + gender);
+        }
         this.gender = gender;
     }
 
@@ -135,27 +147,15 @@ public class Person {
 
     public void merge(Person person) {
         if (person.id != null) {
-            if (this.id != null && !this.id.equals(person.id)) {
-                throw new IllegalStateException("Different data ID: " + this.id + " != " + person.id);
-            }
             setId(person.id);
         }
         if (person.firstname != null) {
-            if (this.firstname != null && !this.firstname.equals(person.firstname)) {
-                throw new IllegalStateException("Different data FIRSTNAME: " + this.firstname + " != " + person.firstname);
-            }
             setFirstname(person.firstname);
         }
         if (person.surname != null) {
-            if (this.surname != null && !this.surname.equals(person.surname)) {
-                throw new IllegalStateException("Different data SURNAME: " + this.surname + " != " + person.surname);
-            }
             setSurname(person.surname);
         }
         if (person.gender != null) {
-            if (this.gender != null && !this.gender.equals(person.gender)) {
-                throw new IllegalStateException("Different data GENDER: " + this.gender + " != " + person.gender);
-            }
             setGender(person.gender);
         }
         if (!person.siblings.isEmpty()) {
@@ -281,7 +281,7 @@ public class Person {
             return id.equals(person.id);
         }
         if (this.firstname != null && person.firstname != null &&
-            this.surname != null && person.surname != null) {
+                this.surname != null && person.surname != null) {
             return firstname.equals(person.firstname) && surname.equals(person.surname);
         }
         return false;
