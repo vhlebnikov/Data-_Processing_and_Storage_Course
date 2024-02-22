@@ -8,7 +8,7 @@ import java.util.Objects;
 public class Main {
     public static void main(String[] args) {
         PersonParser.parse("src/main/resources/people.xml");
-        Persons persons = PersonParser.getPersons();
+//        Persons persons = PersonParser.getPersons();
 //        for (Person p : persons.getPersons()) {
 //            System.out.println(p);
 //        }

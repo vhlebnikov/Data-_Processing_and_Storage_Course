@@ -12,6 +12,7 @@ import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -150,9 +151,10 @@ public class PersonParser {
                         }
                         if (values.containsKey("name")) {
                             String name = values.get("name").get(0).trim();
-                            String[] fullName = name.split(" ");
-                            String firstname = fullName[0];
-                            String surname = fullName[1];
+                            List<String> fullName =
+                                    Stream.of(name.split(" ")).filter(s -> !s.isBlank()).toList();
+                            String firstname = fullName.get(0);
+                            String surname = fullName.get(1);
                             newPerson.setFirstname(firstname);
                             newPerson.setSurname(surname);
                         }
@@ -168,9 +170,10 @@ public class PersonParser {
                         if (values.containsKey("spouce")) {
                             List<String> spoucesNames = values.get("spouce").stream().map(String::trim).distinct().toList();
                             spoucesNames.forEach(s -> {
-                                String[] fullName = s.split(" ");
-                                String firstname = fullName[0];
-                                String surname = fullName[1];
+                                List<String> fullName =
+                                        Stream.of(s.split(" ")).filter(s1 -> !s1.isBlank()).toList();
+                                String firstname = fullName.get(0);
+                                String surname = fullName.get(1);
                                 Person spouce = new Person();
                                 spouce.setFirstname(firstname);
                                 spouce.setSurname(surname);
@@ -180,7 +183,7 @@ public class PersonParser {
                         if (values.containsKey("siblings")) {
                             List<String> siblings = values.get("siblings").stream().map(String::trim).distinct().toList();
                             siblings.forEach(x -> {
-                                List<String> siblingsIds = Stream.of(x.split(" ")).distinct().toList();
+                                List<String> siblingsIds = Stream.of(x.split(" ")).filter(s -> !s.isBlank()).distinct().toList();
                                 siblingsIds.forEach(s -> {
                                     Person sibling = new Person();
                                     sibling.setId(s);
@@ -246,9 +249,10 @@ public class PersonParser {
                             List<String> mothers =
                                     values.get("mother").stream().map(String::trim).distinct().toList();
                             mothers.forEach(f -> {
-                                String[] fullName = f.split(" ");
-                                String firstname = fullName[0];
-                                String surname = fullName[1];
+                                List<String> fullName =
+                                        Stream.of(f.split(" ")).filter(s -> !s.isBlank()).toList();
+                                String firstname = fullName.get(0);
+                                String surname = fullName.get(1);
                                 Person mother = new Person();
                                 mother.setFirstname(firstname);
                                 mother.setSurname(surname);
@@ -259,9 +263,10 @@ public class PersonParser {
                             List<String> sisters =
                                     values.get("sister").stream().map(String::trim).distinct().toList();
                             sisters.forEach(s -> {
-                                String[] fullName = s.split(" ");
-                                String firstname = fullName[0];
-                                String surname = fullName[1];
+                                List<String> fullName =
+                                        Stream.of(s.split(" ")).filter(s1 -> !s1.isBlank()).toList();
+                                String firstname = fullName.get(0);
+                                String surname = fullName.get(1);
                                 Person sister = new Person();
                                 sister.setFirstname(firstname);
                                 sister.setSurname(surname);
@@ -272,9 +277,10 @@ public class PersonParser {
                             List<String> brothers =
                                     values.get("brother").stream().map(String::trim).distinct().toList();
                             brothers.forEach(b -> {
-                                String[] fullName = b.split(" ");
-                                String firstname = fullName[0];
-                                String surname = fullName[1];
+                                List<String> fullName =
+                                        Stream.of(b.split(" ")).filter(s -> !s.isBlank()).toList();
+                                String firstname = fullName.get(0);
+                                String surname = fullName.get(1);
                                 Person brother = new Person();
                                 brother.setFirstname(firstname);
                                 brother.setSurname(surname);
@@ -300,9 +306,10 @@ public class PersonParser {
                             List<String> children =
                                     values.get("child").stream().map(String::trim).distinct().toList();
                             children.forEach(c -> {
-                                String[] fullName = c.split(" ");
-                                String firstname = fullName[0];
-                                String surname = fullName[1];
+                                List<String> fullName =
+                                        Stream.of(c.split(" ")).filter(s -> !s.isBlank()).toList();
+                                String firstname = fullName.get(0);
+                                String surname = fullName.get(1);
                                 Person child = new Person();
                                 child.setFirstname(firstname);
                                 child.setSurname(surname);
