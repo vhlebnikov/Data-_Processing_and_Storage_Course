@@ -1,9 +1,21 @@
 package ru.nsu.khlebnikov;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serial;
+import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Persons {
+public class Persons implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private final List<Person> persons;
     private final int initialCount;
 
@@ -13,12 +25,15 @@ public class Persons {
     }
 
     public void addPerson(Person person) {
-        Person existingPerson = persons.stream().filter(p -> p.equals(person)).findFirst().orElse(null);
-        if (existingPerson != null) {
-            existingPerson.merge(person);
-        } else {
-            persons.add(person);
+        List<Person> existingPersons = persons.stream().filter(p -> p.equals(person)).toList();
+        if (!existingPersons.isEmpty()) {
+            for (Person p : existingPersons) {
+                if (p.merge(person)) {
+                    return;
+                }
+            }
         }
+        persons.add(person);
     }
 
     public int getInitialCount() {
@@ -31,5 +46,37 @@ public class Persons {
 
     public List<Person> getPersons() {
         return persons;
+    }
+
+    public List<Person> getPersonByFullName(String firstname, String surname) {
+        return persons.stream().filter(p -> p.getFirstname() != null && p.getSurname() != null &&
+                p.getFirstname().equals(firstname) && p.getSurname().equals(surname)).toList();
+    }
+
+    public void serialize() {
+        try {
+            Path saves = Path.of("saves");
+            if (!Files.exists(saves)) {
+                Files.createDirectories(saves);
+            }
+            FileOutputStream fileOutputStream = new FileOutputStream("saves/save.ser");
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(this);
+            fileOutputStream.close();
+            objectOutputStream.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Persons deserialize(String path) {
+        Persons res = null;
+        try (FileInputStream fileInputStream = new FileInputStream(path);
+             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
+            res = (Persons) objectInputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Can't find file");
+        }
+        return res;
     }
 }
