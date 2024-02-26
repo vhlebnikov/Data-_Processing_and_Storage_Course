@@ -474,25 +474,16 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return "Person{" +
+        return "PERSON!!!{" +
                 "id='" + id + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", surname='" + surname + '\'' +
                 ", gender='" + gender + '\'' +
                 ", siblingsNumber=" + siblingsNumber +
                 ", siblings=" + siblings +
-                ", sisters=" + sisters +
-                ", brothers=" + brothers +
                 ", childrenNumber=" + childrenNumber +
                 ", children=" + children +
-                ", sons=" + sons +
-                ", daughters=" + daughters +
                 ", spouce=" + spouce +
-                ", husband=" + husband +
-                ", wife=" + wife +
-                ", parents=" + parents +
-                ", father=" + father +
-                ", mother=" + mother +
                 '}';
     }
 }

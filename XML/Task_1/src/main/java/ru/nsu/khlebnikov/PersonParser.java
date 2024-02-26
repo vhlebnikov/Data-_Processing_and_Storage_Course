@@ -471,6 +471,21 @@ public class PersonParser {
         System.out.println("Normalizing done.");
     }
 
+    public static void validateConsistency() {
+        System.out.println("Validation was started");
+        for (Person person : persons.getPersons()) {
+            if (person.getSiblingsNumber() != person.getSiblings().size()) {
+                throw new IllegalStateException("Different numbers of siblings for person " + person.getId() + ": " +
+                        person.getSiblingsNumber() + " != " + person.getSiblings().size() + "\n" + person);
+            }
+            if (person.getChildrenNumber() != person.getChildren().size()) {
+                throw new IllegalStateException("Different numbers of children for person " + person.getId() + ": " +
+                        person.getChildrenNumber() + " != " + person.getChildren().size() + "\n" + person);
+            }
+        }
+        System.out.println("Validation was successfully completed");
+    }
+
     private static void addPersonToList(Person person, List<Person> list) {
         if (list.isEmpty()) {
             list.add(person);

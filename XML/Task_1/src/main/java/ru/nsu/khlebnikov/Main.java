@@ -9,10 +9,15 @@ public class Main {
 //        PersonParser.getPersons().serialize("data.ser");
 
         PersonParser.setPersons(Persons.deserialize("saves/data.ser"));
+//        PersonParser.validateConsistency();
 
         System.out.println("Start search (after parsing)");
-        List<Person> foundPersons = PersonParser.getPersons().getPersonByFullName("Kaylene", "Startz");
+        List<Person> foundPersons = PersonParser.getPersons().getPersonByFullName("Tonya", "Loschiavo");
         foundPersons.forEach(System.out::println);
+
+//        foundPersons = PersonParser.getPersons().getPersonByFullName("Kaylene", "Startz");
+//        foundPersons.forEach(System.out::println);
+
 
 //        PersonParser.findDuplicates();
 
@@ -20,9 +25,12 @@ public class Main {
 //        PersonParser.getPersons().serialize("data_normalized.ser");
 
         PersonParser.setPersons(Persons.deserialize("saves/data_normalized.ser"));
+//        PersonParser.validateConsistency();
+        System.out.println("Start search (after normalizing)");
+//        foundPersons = PersonParser.getPersons().getPersonByFullName("Kaylene", "Startz");
+//        foundPersons.forEach(System.out::println);
 
-        System.out.println("Start search (after parsing)");
-        foundPersons = PersonParser.getPersons().getPersonByFullName("Kaylene", "Startz");
+        foundPersons = PersonParser.getPersons().getPersonByFullName("Tonya", "Loschiavo");
         foundPersons.forEach(System.out::println);
     }
 }
