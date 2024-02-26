@@ -8,9 +8,9 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public class ProgressBar {
-    private static long totalLines = -1;
     private static final long barPartsNumber = 20;
-    public static long getLines(String filePath) {
+    public static long getLinesInXML(String filePath) {
+        long totalLines = -1;
         try (Stream<String> stream = Files.lines(Path.of(filePath), StandardCharsets.UTF_8)) {
             totalLines = stream.count();
         } catch (IOException e) {
@@ -19,16 +19,15 @@ public class ProgressBar {
         return totalLines;
     }
 
-    private static long getCurrentLine(XMLEvent event) {
+    public static long getCurrentLineInXML(XMLEvent event) {
         return event.getLocation().getLineNumber();
     }
 
-    public static void printProgress(XMLEvent event) {
+    public static void printProgress(long currentLine, long totalLines) {
         if (totalLines == -1) {
             System.err.println("Empty file");
             return;
         }
-        long currentLine = getCurrentLine(event);
         long percentage = Math.floorDiv(currentLine * 100, totalLines);
 
         if (percentage >= 0) {
@@ -43,7 +42,7 @@ public class ProgressBar {
             }
             System.out.print("] (" + currentLine + "/" + totalLines + ") \r");
         } else {
-            System.out.println("Parsing done!");
+            System.out.println("Progress: Done!");
         }
     }
 }

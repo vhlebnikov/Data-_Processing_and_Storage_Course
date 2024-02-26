@@ -1,7 +1,5 @@
 package ru.nsu.khlebnikov;
 
-import org.w3c.dom.Attr;
-
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -12,7 +10,6 @@ import javax.xml.stream.events.XMLEvent;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -28,15 +25,18 @@ public class PersonParser {
     public static void parse(String path) {
         try {
             try {
-                System.out.println("Start parse file: " + path);
-                System.out.println("Total lines: " + ProgressBar.getLines(path));
+                System.out.println("Started parse file: " + path);
+                long totalLines = ProgressBar.getLinesInXML(path);
+                System.out.println("Total lines: " + totalLines);
+
                 reader = xmlInputFactory.createXMLEventReader(new FileInputStream(path));
                 Map<String, List<String>> values = new HashMap<>();
                 String lastElementName = null;
 
                 while (reader.hasNext()) {
                     XMLEvent event = reader.nextEvent();
-                    ProgressBar.printProgress(event);
+                    long currentLine = ProgressBar.getCurrentLineInXML(event);
+                    ProgressBar.printProgress(currentLine, totalLines);
                     if (event.isStartElement()) {
                         StartElement startElement = event.asStartElement();
                         lastElementName = startElement.getName().getLocalPart();
@@ -295,10 +295,42 @@ public class PersonParser {
                 }
             } finally {
                 reader.close();
+                System.out.println("Parsing done.");
             }
         } catch (XMLStreamException | FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void findDuplicates() {
+        System.out.println("Search has been started");
+        System.out.println("Initial persons count: " + persons.getInitialCount());
+        long totalPersons = persons.getPersonsCount();
+        long currentPersonNumber = 0;
+        System.out.println("Current persons count: " + totalPersons);
+        List<Person> allPersons = persons.getPersons();
+        List<List<Person>> duplicates = new ArrayList<>();
+        for (Person person : allPersons) {
+            ProgressBar.printProgress(currentPersonNumber++, totalPersons);
+            List<Person> existingPersons = allPersons.stream().filter(p -> p.equals(person)).toList();
+            if (existingPersons.size() >= 2){
+                duplicates.add(existingPersons);
+            }
+        }
+        ProgressBar.printProgress(-1, totalPersons);
+        if (!duplicates.isEmpty()) {
+            System.out.println("Duplicates:");
+            duplicates.forEach(list -> {
+                System.out.println(list.size() + " duplicates like this:");
+                list.forEach(System.out::println);
+            });
+        } else {
+            System.out.println("There are no duplicates");
+        }
+    }
+
+    public static void normalize() {
+
     }
 
     private static List<String> splitFullName(String fullName) {
@@ -315,5 +347,9 @@ public class PersonParser {
 
     public static Persons getPersons() {
         return persons;
+    }
+
+    public static void setPersons(Persons persons) {
+        PersonParser.persons = persons;
     }
 }

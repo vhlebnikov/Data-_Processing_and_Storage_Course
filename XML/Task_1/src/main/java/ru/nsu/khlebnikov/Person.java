@@ -334,6 +334,13 @@ public class Person implements Serializable {
         return id;
     }
 
+    public Object getIdAsInt() {
+        if (id == null) {
+            return null;
+        }
+        return Integer.parseInt(id.substring(1));
+    }
+
     public String getFirstname() {
         return firstname;
     }

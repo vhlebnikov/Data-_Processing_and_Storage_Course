@@ -11,6 +11,9 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class Persons implements Serializable {
@@ -54,6 +57,7 @@ public class Persons implements Serializable {
     }
 
     public void serialize() {
+        System.out.println("Serializing was started");
         try {
             Path saves = Path.of("saves");
             if (!Files.exists(saves)) {
@@ -70,6 +74,7 @@ public class Persons implements Serializable {
     }
 
     public static Persons deserialize(String path) {
+        System.out.println("Deserializing was started");
         Persons res = null;
         try (FileInputStream fileInputStream = new FileInputStream(path);
              ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
