@@ -313,7 +313,7 @@ public class PersonParser {
         for (Person person : allPersons) {
             ProgressBar.printProgress(currentPersonNumber++, totalPersons);
             List<Person> existingPersons = allPersons.stream().filter(p -> p.equals(person)).toList();
-            if (existingPersons.size() >= 2){
+            if (existingPersons.size() >= 2) {
                 duplicates.add(existingPersons);
             }
         }
@@ -330,7 +330,169 @@ public class PersonParser {
     }
 
     public static void normalize() {
+        System.out.println("Normalizing has been started");
+        long totalPersons = persons.getPersonsCount();
+        long currentPersonNumber = 0;
+        List<Person> allPersons = persons.getPersons();
+        for (Person person : allPersons) {
+            ProgressBar.printProgress(currentPersonNumber++, totalPersons);
 
+            // Siblings: sisters and brothers
+            List<Person> allSiblings = new ArrayList<>();
+            if (!person.getSiblings().isEmpty()) {
+                person.getSiblings().forEach(s -> addPersonToList(s, allSiblings));
+            }
+            if (!person.getSisters().isEmpty()) {
+                person.getSisters().forEach(s -> {
+                    s.setGender("female");
+                    addPersonToList(s, allSiblings);
+                });
+            }
+            if (!person.getBrothers().isEmpty()) {
+                person.getBrothers().forEach(b -> {
+                    b.setGender("male");
+                    addPersonToList(b, allSiblings);
+                });
+            }
+
+            findAndMerge(allSiblings);
+
+            if (!allSiblings.isEmpty()) {
+                List<Person> allSiblingsMainInfo = new ArrayList<>();
+                allSiblings.forEach(s -> allSiblingsMainInfo.add(s.saveOnlyMainInfo()));
+
+                person.setSiblings(allSiblingsMainInfo);
+
+                List<Person> sisters =
+                        allSiblingsMainInfo.stream().filter(s -> s.getGender() != null && s.getGender().equals("female")).toList();
+                person.setSisters(sisters);
+
+                List<Person> brothers =
+                        allSiblingsMainInfo.stream().filter(s -> s.getGender() != null && s.getGender().equals("male")).toList();
+                person.setBrothers(brothers);
+            }
+
+            // Children: sons and daughters
+            List<Person> allChildren = new ArrayList<>();
+            if (!person.getChildren().isEmpty()) {
+                person.getChildren().forEach(c -> addPersonToList(c, allChildren));
+            }
+            if (!person.getSons().isEmpty()) {
+                person.getSons().forEach(s -> {
+                    s.setGender("male");
+                    addPersonToList(s, allChildren);
+                });
+            }
+            if (!person.getDaughters().isEmpty()) {
+                person.getDaughters().forEach(d -> {
+                    d.setGender("female");
+                    addPersonToList(d, allChildren);
+                });
+            }
+
+            findAndMerge(allChildren);
+
+            if (!allChildren.isEmpty()) {
+                List<Person> allChildrenMainInfo = new ArrayList<>();
+                allChildren.forEach(c -> allChildrenMainInfo.add(c.saveOnlyMainInfo()));
+
+                person.setChildren(allChildrenMainInfo);
+
+                List<Person> sons =
+                        allChildrenMainInfo.stream().filter(c -> c.getGender() != null && c.getGender().equals("male")).toList();
+                person.setSons(sons);
+
+                List<Person> daughters =
+                        allChildrenMainInfo.stream().filter(c -> c.getGender() != null && c.getGender().equals("female")).toList();
+                person.setDaughters(daughters);
+            }
+
+            // Parents: father and mother
+            List<Person> allParents = new ArrayList<>();
+            if (!person.getParents().isEmpty()) {
+                person.getParents().forEach(p -> addPersonToList(p, allParents));
+            }
+            if (person.getFather() != null) {
+                Person father = person.getFather();
+                father.setGender("male");
+                addPersonToList(father, allParents);
+            }
+            if (person.getMother() != null) {
+                Person mother = person.getMother();
+                mother.setGender("female");
+                addPersonToList(mother, allParents);
+            }
+
+            findAndMerge(allParents);
+
+            if (!allParents.isEmpty()) {
+                List<Person> allParentsMainInfo = new ArrayList<>();
+                allParents.forEach(p -> allParentsMainInfo.add(p.saveOnlyMainInfo()));
+
+                person.setParents(allParentsMainInfo);
+
+                allParentsMainInfo.stream().filter(p -> p.getGender() != null &&
+                        p.getGender().equals("male")).findFirst().ifPresent(person::setFather);
+
+                allParentsMainInfo.stream().filter(p -> p.getGender() != null &&
+                        p.getGender().equals("female")).findFirst().ifPresent(person::setMother);
+            }
+
+            // Spouce: husband or wife
+            Person spouce = person.getSpouce();
+            Person oneMoreSpouce = null;
+            if (person.getWife() != null) {
+                oneMoreSpouce = person.getWife();
+                oneMoreSpouce.setGender("female");
+            }
+            if (person.getHusband() != null) {
+                oneMoreSpouce = person.getHusband();
+                oneMoreSpouce.setGender("male");
+            }
+            if (oneMoreSpouce != null) {
+                if (spouce != null) {
+                    spouce.merge(oneMoreSpouce);
+                } else {
+                    spouce = oneMoreSpouce;
+                }
+            }
+            if (spouce != null) {
+                Person finalSpouce = spouce;
+                persons.getPersons().stream().filter(x -> x.equals(finalSpouce)).findFirst().ifPresent(spouce::merge);
+                Person spouceMainInfo = spouce.saveOnlyMainInfo();
+                person.setSpouce(spouceMainInfo);
+                switch (spouce.getGender()) {
+                    case "male" -> person.setHusband(spouceMainInfo);
+                    case "female" -> person.setWife(spouceMainInfo);
+                }
+            }
+        }
+        ProgressBar.printProgress(-1, totalPersons);
+        System.out.println("Normalizing done.");
+    }
+
+    private static void addPersonToList(Person person, List<Person> list) {
+        if (list.isEmpty()) {
+            list.add(person);
+            return;
+        }
+        List<Person> existingPersons = list.stream().filter(p -> p.equals(person)).toList();
+        if (!existingPersons.isEmpty()) {
+            for (Person p : existingPersons) {
+                if (p.merge(person)) {
+                    return;
+                }
+            }
+        }
+        list.add(person);
+    }
+
+    private static void findAndMerge(List<Person> personsToMerge) {
+        if (!personsToMerge.isEmpty()) {
+            personsToMerge.forEach(p ->
+                    persons.getPersons().stream().
+                            filter(x -> x.equals(p)).findFirst().ifPresent(p::merge));
+        }
     }
 
     private static List<String> splitFullName(String fullName) {

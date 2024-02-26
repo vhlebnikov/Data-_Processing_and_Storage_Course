@@ -60,6 +60,15 @@ public class Person implements Serializable {
         this.mother = p.mother;
     }
 
+    public Person saveOnlyMainInfo() {
+        Person person = new Person();
+        person.setId(this.id);
+        person.setFirstname(this.firstname);
+        person.setSurname(this.surname);
+        person.setGender(this.gender);
+        return person;
+    }
+
     public void setId(String id) {
         if (this.id != null && !this.id.equals(id)) {
             throw new IllegalStateException("Different data ID: " + this.id + " != " + id);
@@ -229,6 +238,34 @@ public class Person implements Serializable {
         this.childrenNumber = childrenNumber;
     }
 
+    public void setSiblings(List<Person> siblings) {
+        this.siblings = siblings;
+    }
+
+    public void setSisters(List<Person> sisters) {
+        this.sisters = sisters;
+    }
+
+    public void setBrothers(List<Person> brothers) {
+        this.brothers = brothers;
+    }
+
+    public void setChildren(List<Person> children) {
+        this.children = children;
+    }
+
+    public void setSons(List<Person> sons) {
+        this.sons = sons;
+    }
+
+    public void setDaughters(List<Person> daughters) {
+        this.daughters = daughters;
+    }
+
+    public void setParents(List<Person> parents) {
+        this.parents = parents;
+    }
+
     public boolean merge(Person person) {
         Person copy = new Person();
         copy.copy(this);
@@ -383,6 +420,22 @@ public class Person implements Serializable {
 
     public Person getMother() {
         return mother;
+    }
+
+    public List<Person> getSiblings() {
+        return siblings;
+    }
+
+    public List<Person> getChildren() {
+        return children;
+    }
+
+    public Person getSpouce() {
+        return spouce;
+    }
+
+    public List<Person> getParents() {
+        return parents;
     }
 
     @Override

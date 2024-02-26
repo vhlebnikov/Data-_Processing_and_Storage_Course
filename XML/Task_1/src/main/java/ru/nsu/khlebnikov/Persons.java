@@ -56,14 +56,14 @@ public class Persons implements Serializable {
                 p.getFirstname().equals(firstname) && p.getSurname().equals(surname)).toList();
     }
 
-    public void serialize() {
+    public void serialize(String fileName) {
         System.out.println("Serializing was started");
         try {
             Path saves = Path.of("saves");
             if (!Files.exists(saves)) {
                 Files.createDirectories(saves);
             }
-            FileOutputStream fileOutputStream = new FileOutputStream("saves/save.ser");
+            FileOutputStream fileOutputStream = new FileOutputStream("saves/" + fileName);
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
             objectOutputStream.writeObject(this);
             fileOutputStream.close();
@@ -71,6 +71,7 @@ public class Persons implements Serializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("Serializing done.");
     }
 
     public static Persons deserialize(String path) {
@@ -82,6 +83,7 @@ public class Persons implements Serializable {
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Can't find file");
         }
+        System.out.println("Deserializing done.");
         return res;
     }
 }
