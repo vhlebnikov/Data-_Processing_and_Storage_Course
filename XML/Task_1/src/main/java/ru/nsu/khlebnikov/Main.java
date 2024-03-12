@@ -1,36 +1,19 @@
 package ru.nsu.khlebnikov;
 
-import java.util.List;
-
 public class Main {
     public static void main(String[] args) {
-//        String filePath = "src/main/resources/people.xml";
-//        PersonParser.parse(filePath);
+        String filePath = "src/main/resources/people.xml";
+        PersonParser.parse(filePath);
 //        PersonParser.getPersons().serialize("data.ser");
 
-        PersonParser.setPersons(Persons.deserialize("saves/data.ser"));
-//        PersonParser.validateConsistency();
+//        PersonParser.setPersons(Persons.deserialize("saves/data.ser"));
 
-        System.out.println("Start search (after parsing)");
-        List<Person> foundPersons = PersonParser.getPersons().getPersonByFullName("Tonya", "Loschiavo");
-        foundPersons.forEach(System.out::println);
-
-//        foundPersons = PersonParser.getPersons().getPersonByFullName("Kaylene", "Startz");
-//        foundPersons.forEach(System.out::println);
-
-
-//        PersonParser.findDuplicates();
-
-//        PersonParser.normalize();
+        PersonParser.getFamilyInfo();
+        PersonParser.normalize();
 //        PersonParser.getPersons().serialize("data_normalized.ser");
 
-        PersonParser.setPersons(Persons.deserialize("saves/data_normalized.ser"));
-//        PersonParser.validateConsistency();
-        System.out.println("Start search (after normalizing)");
-//        foundPersons = PersonParser.getPersons().getPersonByFullName("Kaylene", "Startz");
-//        foundPersons.forEach(System.out::println);
+//        PersonParser.setPersons(Persons.deserialize("saves/data_normalized.ser"));
 
-        foundPersons = PersonParser.getPersons().getPersonByFullName("Tonya", "Loschiavo");
-        foundPersons.forEach(System.out::println);
+        PersonParser.validateConsistency();
     }
 }

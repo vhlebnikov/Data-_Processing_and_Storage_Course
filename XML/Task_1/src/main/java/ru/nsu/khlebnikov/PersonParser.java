@@ -312,7 +312,7 @@ public class PersonParser {
         List<List<Person>> duplicates = new ArrayList<>();
         for (Person person : allPersons) {
             ProgressBar.printProgress(currentPersonNumber++, totalPersons);
-            List<Person> existingPersons = allPersons.stream().filter(p -> p.equals(person)).toList();
+            List<Person> existingPersons = allPersons.parallelStream().filter(p -> p.equals(person)).toList();
             if (existingPersons.size() >= 2) {
                 duplicates.add(existingPersons);
             }
@@ -331,6 +331,48 @@ public class PersonParser {
 
     public static void normalize() {
         System.out.println("Normalizing has been started");
+        long totalPersons = persons.getPersonsCount();
+        long currentPersonNumber = 0;
+        List<Person> allPersons = persons.getPersons();
+        for (Person person : allPersons) {
+            ProgressBar.printProgress(currentPersonNumber++, totalPersons);
+
+            List<Person> equalPersons = persons.getPersons().parallelStream().filter(p -> p.weakEquals(person)).toList();
+
+            if (equalPersons.size() > 1) {
+                // Siblings part
+                List<Person> personSiblings = person.getSiblings();
+
+                if (!personSiblings.isEmpty()) {
+                    List<Person> realSiblings =
+                            persons.getPersons().parallelStream().
+                                    filter(p -> personSiblings.stream().anyMatch(s -> s.equals(p))).toList();
+
+                    for (Person realSibling : realSiblings) {
+                        List<Person> siblingsSiblings = realSibling.getSiblings();
+                        if (siblingsSiblings.stream().noneMatch(s -> s.equals(person))) {
+                            Person realOwnerOfSibling =
+                                    equalPersons.stream().filter(p -> siblingsSiblings.stream().
+                                            anyMatch(s -> s.equals(p))).findFirst().orElse(null);
+
+                            if (realOwnerOfSibling != null) {
+                                realOwnerOfSibling.addSibling(realSibling.saveOnlyMainInfo());
+                                person.removeSibling(realSibling);
+                            }
+                        }
+                    }
+                }
+
+                // Children part
+
+            }
+        }
+        ProgressBar.printProgress(-1, totalPersons);
+        System.out.println("Normalizing done.");
+    }
+
+    public static void getFamilyInfo() {
+        System.out.println("Getting additional family info has been started");
         long totalPersons = persons.getPersonsCount();
         long currentPersonNumber = 0;
         List<Person> allPersons = persons.getPersons();
@@ -461,14 +503,16 @@ public class PersonParser {
                 persons.getPersons().stream().filter(x -> x.equals(finalSpouce)).findFirst().ifPresent(spouce::merge);
                 Person spouceMainInfo = spouce.saveOnlyMainInfo();
                 person.setSpouce(spouceMainInfo);
-                switch (spouce.getGender()) {
-                    case "male" -> person.setHusband(spouceMainInfo);
-                    case "female" -> person.setWife(spouceMainInfo);
+                if (spouce.getGender() != null) {
+                    switch (spouce.getGender()) {
+                        case "male" -> person.setHusband(spouceMainInfo);
+                        case "female" -> person.setWife(spouceMainInfo);
+                    }
                 }
             }
         }
         ProgressBar.printProgress(-1, totalPersons);
-        System.out.println("Normalizing done.");
+        System.out.println("Family infos have been updated.");
     }
 
     public static void validateConsistency() {
@@ -505,7 +549,7 @@ public class PersonParser {
     private static void findAndMerge(List<Person> personsToMerge) {
         if (!personsToMerge.isEmpty()) {
             personsToMerge.forEach(p ->
-                    persons.getPersons().stream().
+                    persons.getPersons().parallelStream().
                             filter(x -> x.equals(p)).findFirst().ifPresent(p::merge));
         }
     }

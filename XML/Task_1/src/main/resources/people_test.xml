@@ -1,28 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <people count="32742">
-    <person id="P397288">
-        <wife value="P397949"/>
+    <person name="Tonya Loschiavo">
+        <children-number value="1"/>
+        <surname value="Loschiavo"/>
     </person>
-    <person id="P397018">
-        <mother>Gita Schnetter</mother>
-        <siblings val="P397019 P397012"/>
+    <person name="Tonya Loschiavo">
+        <siblings-number value="2"/>
     </person>
-    <person>
-        <id value="P397288"/>
-        <siblings val="P407730"/>
-        <fullname>
-            <first>Lexie</first>
-            <family>Zaic</family>
-        </fullname>
-        <surname value="Zaic"/>
+    <person name="Tonya Loschiavo">
+        <id value="P390327"/>
+        <siblings val="P390329"/>
     </person>
-    <person>
-        <father>Ezra Turay</father>
-        <fullname>
-            <first>Freda</first>
-            <family>Rabassa</family>
-        </fullname>
-        <firstname>Freda </firstname>
-        <gender value="female"/>
+    <person name=" Tonya Loschiavo">
+        <siblings val="P385166"/>
+        <parent>UNKNOWN</parent>
+        <parent>UNKNOWN</parent>
+        <gender value="male"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <children>
+            <daughter id="P397889"/>
+        </children>
+        <firstname value="Tonya"/>
+        <gender>M</gender>
+    </person>
+    <person name="Tonya Loschiavo">
+        <siblings val="P390329"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <id value="P385164"/>
+        <surname value="Loschiavo"/>
+        <children-number value="0"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <children-number value="1"/>
+        <mother>Willa Loschiavo</mother>
+        <father>Billi Loschiavo</father>
+    </person>
+    <person name="Tonya Loschiavo">
+        <siblings-number value="3"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <gender>M</gender>
+        <siblings val="P390328"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <firstname value="Tonya"/>
+        <siblings val="P385166"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <siblings-number value="2"/>
+        <mother>Willa Loschiavo</mother>
+        <children-number value="1"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <wife value="P393978"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <children-number value="1"/>
+        <firstname value="Tonya"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <siblings val="P385166 P385165"/>
+    </person>
+    <person name="Tonya Loschiavo ">
+        <gender value="male"/>
+        <firstname value="Tonya"/>
+        <siblings val="P385167"/>
+    </person>
+    <person name="Tonya Loschiavo">
+        <surname value="Loschiavo"/>
+        <siblings val="P390329"/>
     </person>
 </people>

@@ -45,17 +45,17 @@ public class Person implements Serializable {
         this.surname = p.surname;
         this.gender = p.gender;
         this.siblingsNumber = p.siblingsNumber;
-        this.siblings = p.siblings;
-        this.sisters = p.sisters;
-        this.brothers = p.brothers;
+        this.siblings = new ArrayList<>(p.siblings);
+        this.sisters = new ArrayList<>(p.sisters);
+        this.brothers = new ArrayList<>(p.brothers);
         this.childrenNumber = p.childrenNumber;
-        this.children = p.children;
-        this.sons = p.sons;
-        this.daughters = p.daughters;
+        this.children = new ArrayList<>(p.children);
+        this.sons = new ArrayList<>(p.sons);
+        this.daughters = new ArrayList<>(p.daughters);
         this.spouce = p.spouce;
         this.husband = p.husband;
         this.wife = p.wife;
-        this.parents = p.parents;
+        this.parents = new ArrayList<>(p.parents);
         this.father = p.father;
         this.mother = p.mother;
     }
@@ -192,6 +192,10 @@ public class Person implements Serializable {
         if (siblings.stream().noneMatch(s -> s.equals(sibling))) {
             siblings.add(sibling);
         }
+    }
+
+    public void removeSibling(Person person) {
+        siblings.remove(person);
     }
 
     public void addSister(Person sister) {
@@ -438,6 +442,17 @@ public class Person implements Serializable {
         return parents;
     }
 
+    public boolean weakEquals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        if (this.firstname != null && person.firstname != null &&
+                this.surname != null && person.surname != null) {
+            return firstname.equals(person.firstname) && surname.equals(person.surname);
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -474,16 +489,18 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return "PERSON!!!{" +
+        return "\nPERSON{" +
                 "id='" + id + '\'' +
                 ", firstname='" + firstname + '\'' +
                 ", surname='" + surname + '\'' +
-                ", gender='" + gender + '\'' +
+                ", g='" + gender + '\'' +
                 ", siblingsNumber=" + siblingsNumber +
+                ", realSibSize=" + siblings.size() +
                 ", siblings=" + siblings +
                 ", childrenNumber=" + childrenNumber +
+                ", realChiNum=" + children.size() +
                 ", children=" + children +
                 ", spouce=" + spouce +
-                '}';
+                "}";
     }
 }

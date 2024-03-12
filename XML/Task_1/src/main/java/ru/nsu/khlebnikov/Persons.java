@@ -1,7 +1,6 @@
 package ru.nsu.khlebnikov;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -11,9 +10,6 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Persons implements Serializable {
@@ -28,10 +24,12 @@ public class Persons implements Serializable {
     }
 
     public void addPerson(Person person) {
-        List<Person> existingPersons = persons.stream().filter(p -> p.equals(person)).toList();
+        List<Person> existingPersons = persons.parallelStream().filter(p -> p.equals(person)).toList();
         if (!existingPersons.isEmpty()) {
             for (Person p : existingPersons) {
                 if (p.merge(person)) {
+                    return;
+                } else if (person.getId() != null && person.getId().equals(p.getId())) {
                     return;
                 }
             }
@@ -52,8 +50,12 @@ public class Persons implements Serializable {
     }
 
     public List<Person> getPersonByFullName(String firstname, String surname) {
-        return persons.stream().filter(p -> p.getFirstname() != null && p.getSurname() != null &&
+        return persons.parallelStream().filter(p -> p.getFirstname() != null && p.getSurname() != null &&
                 p.getFirstname().equals(firstname) && p.getSurname().equals(surname)).toList();
+    }
+
+    public List<Person> getPersonById(String id) {
+        return persons.parallelStream().filter(p -> p.getId() != null && p.getId().equals(id)).toList();
     }
 
     public void serialize(String fileName) {
