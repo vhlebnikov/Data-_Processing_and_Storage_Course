@@ -2,13 +2,30 @@ package ru.nsu.khlebnikov;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +36,9 @@ import java.util.stream.Stream;
 
 public class PersonParser {
     private static final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+    private static final XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
     private static XMLEventReader reader;
+    private static XMLStreamWriter writer;
     private static Persons persons;
 
     public static void parse(String path) {
@@ -302,6 +321,172 @@ public class PersonParser {
         }
     }
 
+    public static void write(String path) {
+        System.out.println("Started writing data to XML");
+        long totalPersons = persons.getPersonsCount();
+        long currentPersonNumber = 0;
+
+        try {
+            try {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                writer = xmlOutputFactory.createXMLStreamWriter(out);
+                writer.writeStartDocument("utf-8", "1.0");
+                writer.writeStartElement("people");
+                writer.writeAttribute("count", String.valueOf(persons.getPersonsCount()));
+                for (Person person : persons.getPersons()) {
+                    ProgressBar.printProgress(currentPersonNumber++, totalPersons);
+                    writer.writeStartElement("person");
+                    if (person.getId() != null) {
+                        writer.writeStartElement("id");
+                        writer.writeCharacters(person.getId());
+                        writer.writeEndElement();
+                    }
+                    if (person.getFirstname() != null) {
+                        writer.writeStartElement("firstname");
+                        writer.writeCharacters(person.getFirstname());
+                        writer.writeEndElement();
+                    }
+                    if (person.getSurname() != null) {
+                        writer.writeStartElement("surname");
+                        writer.writeCharacters(person.getSurname());
+                        writer.writeEndElement();
+                    }
+                    if (person.getGender() != null) {
+                        writer.writeStartElement("gender");
+                        writer.writeCharacters(person.getGender());
+                        writer.writeEndElement();
+                    }
+                    if (!person.getSiblings().isEmpty()) {
+                        writer.writeStartElement("siblings");
+                        for (Person sibling : person.getSiblings()) {
+                            switch (sibling.getGender()) {
+                                case "male" -> writer.writeStartElement("brother");
+                                case "female" -> writer.writeStartElement("sister");
+                            }
+                            if (sibling.getId() != null) {
+                                writer.writeStartElement("id");
+                                writer.writeCharacters(sibling.getId());
+                                writer.writeEndElement();
+                            }
+                            if (sibling.getFirstname() != null) {
+                                writer.writeStartElement("firstname");
+                                writer.writeCharacters(sibling.getFirstname());
+                                writer.writeEndElement();
+                            }
+                            if (sibling.getSurname() != null) {
+                                writer.writeStartElement("surname");
+                                writer.writeCharacters(sibling.getSurname());
+                                writer.writeEndElement();
+                            }
+
+                            writer.writeEndElement();
+                        }
+                        writer.writeEndElement();
+                    }
+                    if (!person.getChildren().isEmpty()) {
+                        writer.writeStartElement("children");
+                        for (Person child : person.getChildren()) {
+                            switch (child.getGender()) {
+                                case "male" -> writer.writeStartElement("son");
+                                case "female" -> writer.writeStartElement("daughter");
+                            }
+                            if (child.getId() != null) {
+                                writer.writeStartElement("id");
+                                writer.writeCharacters(child.getId());
+                                writer.writeEndElement();
+                            }
+                            if (child.getFirstname() != null) {
+                                writer.writeStartElement("firstname");
+                                writer.writeCharacters(child.getFirstname());
+                                writer.writeEndElement();
+                            }
+                            if (child.getSurname() != null) {
+                                writer.writeStartElement("surname");
+                                writer.writeCharacters(child.getSurname());
+                                writer.writeEndElement();
+                            }
+
+                            writer.writeEndElement();
+                        }
+                        writer.writeEndElement();
+                    }
+                    if (person.getSpouce() != null) {
+                        Person spouce = person.getSpouce();
+                        writer.writeStartElement("spouce");
+                        String gender =
+                                spouce.getGender() != null ?
+                                        (spouce.getGender().equals("male") ?
+                                                "husband" : (spouce.getGender().equals("female") ?
+                                                "wife" : null)) : null;
+                        if (gender != null) {
+                            writer.writeStartElement(gender);
+                        }
+                        if (spouce.getId() != null) {
+                            writer.writeStartElement("id");
+                            writer.writeCharacters(spouce.getId());
+                            writer.writeEndElement();
+                        }
+                        if (spouce.getFirstname() != null) {
+                            writer.writeStartElement("firstname");
+                            writer.writeCharacters(spouce.getFirstname());
+                            writer.writeEndElement();
+                        }
+                        if (spouce.getSurname() != null) {
+                            writer.writeStartElement("surname");
+                            writer.writeCharacters(spouce.getSurname());
+                            writer.writeEndElement();
+                        }
+                        if (gender != null) {
+                            writer.writeEndElement();
+                        }
+                        writer.writeEndElement();
+                    }
+                    if (!person.getParents().isEmpty()) {
+                        writer.writeStartElement("parents");
+                        for (Person parent : person.getParents()) {
+                            switch (parent.getGender()) {
+                                case "male" -> writer.writeStartElement("father");
+                                case "female" -> writer.writeStartElement("mother");
+                            }
+                            if (parent.getId() != null) {
+                                writer.writeStartElement("id");
+                                writer.writeCharacters(parent.getId());
+                                writer.writeEndElement();
+                            }
+                            if (parent.getFirstname() != null) {
+                                writer.writeStartElement("firstname");
+                                writer.writeCharacters(parent.getFirstname());
+                                writer.writeEndElement();
+                            }
+                            if (parent.getSurname() != null) {
+                                writer.writeStartElement("surname");
+                                writer.writeCharacters(parent.getSurname());
+                                writer.writeEndElement();
+                            }
+                            writer.writeEndElement();
+                        }
+                        writer.writeEndElement();
+                    }
+                    writer.writeEndElement();
+
+                }
+                writer.writeEndElement();
+                writer.flush();
+
+                String xml = new String(out.toByteArray(), StandardCharsets.UTF_8);
+                String prettyXML = formatXML(xml);
+
+                Files.writeString(Paths.get("saves/" + path), prettyXML, StandardCharsets.UTF_8);
+            } finally {
+                writer.close();
+            }
+        } catch (XMLStreamException | TransformerException | IOException e) {
+            throw new RuntimeException(e);
+        }
+        ProgressBar.printProgress(-1, totalPersons);
+        System.out.println("Writing to XML done.");
+    }
+
     public static void findDuplicates() {
         System.out.println("Search has been started");
         System.out.println("Initial persons count: " + persons.getInitialCount());
@@ -356,8 +541,21 @@ public class PersonParser {
                                             anyMatch(s -> s.equals(p))).findFirst().orElse(null);
 
                             if (realOwnerOfSibling != null) {
-                                realOwnerOfSibling.addSibling(realSibling.saveOnlyMainInfo());
+                                Person realSiblingMainInfo = realSibling.saveOnlyMainInfo();
+                                realOwnerOfSibling.addSibling(realSiblingMainInfo);
                                 person.removeSibling(realSibling);
+                                if (realSiblingMainInfo.getGender() != null) {
+                                    switch (realSiblingMainInfo.getGender()) {
+                                        case "male" -> {
+                                            realOwnerOfSibling.addBrother(realSiblingMainInfo);
+                                            person.removeBrother(realSibling);
+                                        }
+                                        case "female" -> {
+                                            realOwnerOfSibling.addSister(realSiblingMainInfo);
+                                            person.removeSister(realSibling);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -369,6 +567,26 @@ public class PersonParser {
         }
         ProgressBar.printProgress(-1, totalPersons);
         System.out.println("Normalizing done.");
+    }
+
+    private static String formatXML(String xml) throws TransformerException {
+
+        // write data to xml file
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        Transformer transformer = transformerFactory.newTransformer();
+
+        // pretty print by indention
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+        // add standalone="yes", add line break before the root element
+        transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+
+        StreamSource source = new StreamSource(new StringReader(xml));
+        StringWriter output = new StringWriter();
+        transformer.transform(source, new StreamResult(output));
+
+        return output.toString();
+
     }
 
     public static void getFamilyInfo() {

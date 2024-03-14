@@ -195,7 +195,7 @@ public class Person implements Serializable {
     }
 
     public void removeSibling(Person person) {
-        siblings.remove(person);
+        setSiblings(siblings.stream().filter(s -> !s.equals(person)).toList());
     }
 
     public void addSister(Person sister) {
@@ -204,10 +204,18 @@ public class Person implements Serializable {
         }
     }
 
+    public void removeSister(Person person) {
+        setSisters(sisters.stream().filter(s -> !s.equals(person)).toList());
+    }
+
     public void addBrother(Person brother) {
         if (brothers.stream().noneMatch(b -> b.equals(brother))) {
             brothers.add(brother);
         }
+    }
+
+    public void removeBrother(Person person) {
+        setBrothers(brothers.stream().filter(b -> !b.equals(person)).toList());
     }
 
     public void addChild(Person child) {
