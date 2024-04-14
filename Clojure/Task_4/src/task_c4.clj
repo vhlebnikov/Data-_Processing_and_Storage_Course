@@ -97,20 +97,20 @@
   ;;   with 'supply-msg'
   ;; - return new agent state with possibly modified ':buffer' in any case!
   [state ware storage-atom amount]                          ; тут State = это Factory
-  (let [bill (state :bill)
-        buffer (state :buffer)
-        needed-amount (min (- (bill ware) (buffer ware)) amount) ; чтобы не перебрать или не взять лишнего делаем min
-        [old-amount new-amount] (                                 ; такой трюк нужен, во-первых, чтобы убедиться, что мы не переуберём лишнего из атома хранилища
-                                  let [old-amount @storage-atom]  ; во-вторых, чтобы обновить буфер, в зависимости от изменённого количества изделий
-                                  (swap! storage-atom #(- % (min % needed-amount))) ; чтобы не переубрать лишнего
+  (let [bill (state :bill),
+        buffer (state :buffer),
+        needed-amount (min (- (bill ware) (buffer ware)) amount), ; сколько хочется взять со storage'а
+        [old-amount new-amount] (; сколько в итоге мы взяли считаем тут
+                                  let [old-amount @storage-atom] ;
+                                  (swap! storage-atom #(- % (min % needed-amount))) ; чтобы не взять из хранилища больше, чем в нём вообще есть
                                   [old-amount @storage-atom]
-                                  )
+                                  ),
         new-buffer (assoc buffer ware (+ (buffer ware) (- old-amount new-amount))) ; добавляем в буфере по ключу ware разность нового и старого значений в хранилище
         ]
     (if (= bill new-buffer)                                 ; если буфер полностью заполнен (по меркам bill'а)
       (try
         (
-         (Thread/sleep (state :duration))                   ; типо производство тут идёт
+         (Thread/sleep (state :duration))                   ; процесс производства
 
          ; кладём в хранилище ((state :target-storage) :worker) столько продуктов сколько произвели (state :amount)
          (send ((state :target-storage) :worker) supply-msg (state :amount))
@@ -121,7 +121,7 @@
           )
         )
       )
-    (assoc state :buffer new-buffer) ; обновляем состояние буфера
+    (assoc state :buffer new-buffer)                        ; обновляем состояние буфера
     )
   )
 
