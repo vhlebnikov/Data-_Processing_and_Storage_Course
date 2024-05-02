@@ -1,9 +1,9 @@
-DROP TABLE person_parents;
+DROP TABLE IF EXISTS family;
 
-DROP TABLE person_siblings;
+DROP TABLE IF EXISTS spouses;
 
-DROP TABLE person_children;
+DROP TABLE IF EXISTS siblings;
 
-DROP TABLE person_spouce;
+DROP TABLE IF EXISTS persons;
 
-DROP TABLE persons;
+DROP DOMAIN IF EXISTS gender_type;
