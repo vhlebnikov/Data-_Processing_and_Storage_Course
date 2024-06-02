@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/vhlebnikov/Data_Processing_and_Storage_Course/internal/app/model"
+	"time"
 )
 
 type Airport interface {
@@ -18,6 +19,8 @@ type Create interface {
 
 type Flight interface {
 	GetSchedule(limit, offset int, direction, airportCode string) (int, []model.ScheduleFlight, error)
+	GetAirportCodeFromCity(city string) (string, error)
+	GetRoutes(limit, offset, stepLimit int, origin, destination, fareCondition string, departureDate time.Time) (int, []model.Route, error)
 }
 
 type Repository struct {

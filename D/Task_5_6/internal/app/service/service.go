@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/vhlebnikov/Data_Processing_and_Storage_Course/internal/app/model"
 	"github.com/vhlebnikov/Data_Processing_and_Storage_Course/internal/app/repository"
+	"time"
 )
 
 type Airport interface {
@@ -18,6 +19,7 @@ type Create interface {
 
 type Flight interface {
 	GetSchedule(limit, page, direction, airportCode string) (int, []model.ScheduleFlight, error)
+	GetRoutes(limit, page, origin, destination, fareCondition string, departureDate time.Time, stepLimit int) (int, []model.Route, error)
 }
 
 type Service struct {

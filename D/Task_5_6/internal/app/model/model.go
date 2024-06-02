@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
+	"time"
 )
 
 type Response struct {
@@ -52,4 +53,12 @@ type ScheduleFlight struct {
 	DepartureTime string        `json:"departureTime,omitempty" db:"departure_time"`
 	DaysOfWeek    pq.Int64Array `json:"daysOfWeek" db:"dow"`
 	AirportName   string        `json:"airportName" db:"airport_name"`
+}
+
+type Route struct {
+	AirportPath        pq.StringArray `json:"airportPath" db:"airport_path"`
+	FlightNoPath       pq.StringArray `json:"flightNoPath" db:"flight_no_path"`
+	Step               int            `json:"step" db:"step"`
+	ScheduledDeparture time.Time      `json:"scheduledDeparture" db:"scheduled_departure"`
+	ScheduledArrival   time.Time      `json:"scheduledArrival" db:"scheduled_arrival"`
 }
