@@ -21,8 +21,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	api := router.Group("")
 	{
 		api.GET("/cities", h.GetCities)
-		api.GET("/airports", h.GetAirports) // if city was passed then -> search within city
-		api.GET("/schedule", h.GetSchedule) // ?direction=inbound || outbound
+		api.GET("/airports", h.GetAirports)
+		api.GET("/schedule", h.GetSchedule)
 		api.GET("/routes", h.GetRoute)
 		api.POST("/booking", h.CreateBooking)
 		api.POST("/check-in", h.CheckIn)

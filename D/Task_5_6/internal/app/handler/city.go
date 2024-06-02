@@ -17,7 +17,7 @@ func (h *Handler) GetCities(c *gin.Context) {
 		page = "0"
 	}
 
-	cities, err := h.services.GetAllCities(limit, page)
+	count, cities, err := h.services.City.GetAllCities(limit, page)
 	if err != nil {
 		myerr.New(c, http.StatusInternalServerError, err.Error())
 		return
@@ -26,7 +26,8 @@ func (h *Handler) GetCities(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Message: "ok",
 		Payload: gin.H{
-			"rows": cities,
+			"count": count,
+			"rows":  cities,
 		},
 	})
 }

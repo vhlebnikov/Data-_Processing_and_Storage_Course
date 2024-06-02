@@ -6,16 +6,18 @@ import (
 )
 
 type Airport interface {
+	GetAirports(limit, offset int, city string) (int, []model.Airport, error)
 }
 
 type City interface {
-	GetAllCities(limit, offset int) ([]model.City, error)
+	GetAllCities(limit, offset int) (int, []model.City, error)
 }
 
 type Create interface {
 }
 
 type Flight interface {
+	GetSchedule(limit, offset int, direction, airportCode string) (int, []model.ScheduleFlight, error)
 }
 
 type Repository struct {

@@ -14,15 +14,15 @@ func NewCityService(repo repository.City) *CityService {
 	return &CityService{repo: repo}
 }
 
-func (s *CityService) GetAllCities(limit, page string) ([]model.City, error) {
+func (s *CityService) GetAllCities(limit, page string) (int, []model.City, error) {
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
 	offset := limitInt * pageInt

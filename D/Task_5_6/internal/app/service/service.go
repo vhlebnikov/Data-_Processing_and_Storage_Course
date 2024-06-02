@@ -6,16 +6,18 @@ import (
 )
 
 type Airport interface {
+	GetAirports(limit, page, city string) (int, []model.Airport, error)
 }
 
 type City interface {
-	GetAllCities(limit, page string) ([]model.City, error)
+	GetAllCities(limit, page string) (int, []model.City, error)
 }
 
 type Create interface {
 }
 
 type Flight interface {
+	GetSchedule(limit, page, direction, airportCode string) (int, []model.ScheduleFlight, error)
 }
 
 type Service struct {
