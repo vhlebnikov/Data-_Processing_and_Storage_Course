@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/lib/pq"
 )
 
 type Response struct {
@@ -45,18 +46,10 @@ type Airport struct {
 	Timezone    string `json:"timezone" db:"timezone"`
 }
 
-type AirportDB struct {
-	AirportCode string  `db:"airport_code"`
-	AirportName string  `db:"airport_name"`
-	City        string  `db:"city"`
-	Coordinates []uint8 `db:"coordinates"`
-	Timezone    string  `db:"timezone"`
-}
-
 type ScheduleFlight struct {
-	FlightNo      string `json:"flightNo" db:"flight_no"`
-	ArrivalTime   string `json:"arrivalTime" db:"arrival_time"`
-	DepartureTime string `json:"departureTime" db:"departure_time"`
-	DaysOfWeek    []int  `json:"daysOfWeek" db:"dow"`
-	AirportName   string `json:"airportName" db:"airport_name"`
+	FlightNo      string        `json:"flightNo" db:"flight_no"`
+	ArrivalTime   string        `json:"arrivalTime,omitempty" db:"arrival_time"`
+	DepartureTime string        `json:"departureTime,omitempty" db:"departure_time"`
+	DaysOfWeek    pq.Int64Array `json:"daysOfWeek" db:"dow"`
+	AirportName   string        `json:"airportName" db:"airport_name"`
 }

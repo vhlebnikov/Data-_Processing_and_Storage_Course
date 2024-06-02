@@ -25,4 +25,5 @@ func (s *FlightService) GetSchedule(limit, page, direction, airportCode string) 
 	}
 	offset := limitInt * pageInt
 
+	return s.repo.GetSchedule(limitInt, offset, direction, airportCode)
 }

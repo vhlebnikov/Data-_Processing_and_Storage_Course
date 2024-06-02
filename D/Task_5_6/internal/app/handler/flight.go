@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/vhlebnikov/Data_Processing_and_Storage_Course/internal/app/model"
 	"github.com/vhlebnikov/Data_Processing_and_Storage_Course/internal/app/myerr"
 	"net/http"
 )
@@ -32,6 +33,19 @@ func (h *Handler) GetSchedule(c *gin.Context) {
 		page = "0"
 	}
 
+	count, flights, err := h.services.Flight.GetSchedule(limit, page, direction, airportCode)
+	if err != nil {
+		myerr.New(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Message: "ok",
+		Payload: gin.H{
+			"count": count,
+			"rows":  flights,
+		},
+	})
 }
 
 func (h *Handler) GetRoute(c *gin.Context) {
