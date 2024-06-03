@@ -15,9 +15,9 @@ type City interface {
 }
 
 type Create interface {
-	GetFlightsPrices(flightsIds []int, fareCondition string) ([]model.FlightPrice, error)
+	GetFlightsPrices(flightsIds []int, fareConditions string) ([]model.FlightPrice, error)
 	CreateBooking(bookDate time.Time, totalAmount float64, bookRef string) error
-	CreateTickets(flightPrices []model.FlightPrice, bookRef, fareCondition, passengerName string, passengerIds, ticketsNo []string, contactData model.JSON) ([]model.Ticket, error)
+	CreateTickets(flightPrices []model.FlightPrice, bookRef, fareConditions, passengerName string, passengerIds, ticketsNo []string, contactData model.JSON) ([]model.Ticket, error)
 	GetFareConditions(ticketNo string, flightId int) (string, error)
 	GetFreeSeatForFlight(flightId int, fareConditions string) (string, error)
 	GetNextBoardingNo() (int, error)
@@ -27,7 +27,7 @@ type Create interface {
 type Flight interface {
 	GetSchedule(limit, offset int, direction, airportCode string) (int, []model.ScheduleFlight, error)
 	GetAirportCodeFromCity(city string) (string, error)
-	GetRoutes(limit, offset, stepLimit int, origin, destination, fareCondition string, departureDate time.Time) (int, []model.Route, error)
+	GetRoutes(limit, offset, stepLimit int, origin, destination, fareConditions string, departureDate time.Time) (int, []model.Route, error)
 }
 
 type Repository struct {

@@ -7,6 +7,19 @@ import (
 	"net/http"
 )
 
+// GetAirports Handler to get all available airports or in certain city
+//
+//	@Summary		Get all available airports or in certain city
+//	@Description	Supports pagination (limit, page params)
+//	@Description	If you want to get airports in certain city pass 'city' parameter
+//	@Tags			airports
+//	@Produce		json
+//	@Param			city	query		string	false	"city where airports are located"					example("Якутск")
+//	@Param			limit	query		int		false	"limit of received data, default=30"				example(10)
+//	@Param			page	query		int		false	"page of data that you want to receive, default=0"	example(2)
+//	@Success		200		{object}	model.AirportsResponse
+//	@Failure		400,500	{object}	model.Response
+//	@Router			/airports [get]
 func (h *Handler) GetAirports(c *gin.Context) {
 	city := c.Query("city")
 	limit := c.Query("limit")

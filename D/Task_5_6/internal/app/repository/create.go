@@ -16,7 +16,7 @@ func NewCreatePostgres(db *sqlx.DB) *CreatePostgres {
 	return &CreatePostgres{db: db}
 }
 
-func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareCondition string) ([]model.FlightPrice, error) {
+func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareConditions string) ([]model.FlightPrice, error) {
 	query := `SELECT f.flight_id, MIN(tf.amount) AS amount
 				FROM flights f
 				JOIN ticket_flights tf
@@ -41,7 +41,7 @@ func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareCondition string
 
 	for _, id := range flightsIds {
 		var price model.FlightPrice
-		err = stmt.Get(&price, id, fareCondition)
+		err = stmt.Get(&price, id, fareConditions)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				price = model.FlightPrice{
@@ -68,7 +68,7 @@ func (r *CreatePostgres) CreateBooking(bookDate time.Time, totalAmount float64, 
 	return err
 }
 
-func (r *CreatePostgres) CreateTickets(flightPrices []model.FlightPrice, bookRef, fareCondition,
+func (r *CreatePostgres) CreateTickets(flightPrices []model.FlightPrice, bookRef, fareConditions,
 	passengerName string, passengerIds, ticketsNo []string, contactData model.JSON) ([]model.Ticket, error) {
 
 	queryCreateTicket := `INSERT INTO tickets (ticket_no, book_ref, passenger_id, passenger_name, contact_data)
@@ -104,7 +104,7 @@ func (r *CreatePostgres) CreateTickets(flightPrices []model.FlightPrice, bookRef
 		}
 
 		var ticket model.Ticket
-		err = stmtTicketFlights.Get(&ticket, ticketsNo[i], price.FlightId, fareCondition, price.Amount)
+		err = stmtTicketFlights.Get(&ticket, ticketsNo[i], price.FlightId, fareConditions, price.Amount)
 		if err != nil {
 			return nil, err
 		}

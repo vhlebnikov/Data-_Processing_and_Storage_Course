@@ -16,6 +16,13 @@ import (
 	"syscall"
 )
 
+//	@title			Airlines Service
+//	@version		1.0
+//	@description	API Server for Airlines Service (D_6 task for DPaS course)
+
+//	@host		localhost:8080
+//	@BasePath	/
+
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v\n", err.Error())

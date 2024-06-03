@@ -31,7 +31,7 @@ func (s *FlightService) GetSchedule(limit, page, direction, airportCode string) 
 	return s.repo.GetSchedule(limitInt, offset, direction, airportCode)
 }
 
-func (s *FlightService) GetRoutes(limit, page, origin, destination, fareCondition string,
+func (s *FlightService) GetRoutes(limit, page, origin, destination, fareConditions string,
 	departureDate time.Time, stepLimit int) (int, []model.Route, error) {
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
@@ -61,5 +61,5 @@ func (s *FlightService) GetRoutes(limit, page, origin, destination, fareConditio
 		}
 	}
 
-	return s.repo.GetRoutes(limitInt, offset, stepLimit, realOrigin, realDestination, fareCondition, departureDate)
+	return s.repo.GetRoutes(limitInt, offset, stepLimit, realOrigin, realDestination, fareConditions, departureDate)
 }

@@ -7,6 +7,17 @@ import (
 	"net/http"
 )
 
+// GetCities Handler to get all available cities
+//
+//	@Summary		Get all available cities
+//	@Description	Supports pagination (limit, page params)
+//	@Tags			cities
+//	@Produce		json
+//	@Param			limit	query		int	false	"limit of received data, default=120"				example(10)
+//	@Param			page	query		int	false	"page of data that you want to receive, default=0"	example(2)
+//	@Success		200		{object}	model.CitiesResponse
+//	@Failure		400,500	{object}	model.Response
+//	@Router			/cities [get]
 func (h *Handler) GetCities(c *gin.Context) {
 	limit := c.Query("limit")
 	if limit == "" {

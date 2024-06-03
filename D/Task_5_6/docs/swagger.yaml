@@ -1,0 +1,522 @@
+basePath: /
+definitions:
+  handler.CheckIn.Request:
+    properties:
+      flightId:
+        example: 7343
+        type: integer
+      ticketNo:
+        example: _086b048c8144
+        type: string
+    required:
+    - flightId
+    - ticketNo
+    type: object
+  handler.CreateBooking.Request:
+    properties:
+      bookDate:
+        example: "2017-09-10"
+        type: string
+      contactData:
+        additionalProperties:
+          type: string
+        example:
+          email: myemail@gmail.com
+          phone: "+79123456789"
+        type: object
+      fareConditions:
+        example: Economy
+        type: string
+      flightIds:
+        example:
+        - 7343
+        - 28480
+        items:
+          type: number
+        type: array
+      passengerName:
+        example: KHLEBNIKOV VADIM
+        type: string
+    required:
+    - bookDate
+    - fareConditions
+    - flightIds
+    - passengerName
+    type: object
+  model.Airport:
+    properties:
+      city:
+        example: Якутск
+        type: string
+      code:
+        example: YKS
+        type: string
+      coordinates:
+        $ref: '#/definitions/model.Point'
+      name:
+        example: Якутск
+        type: string
+      timezone:
+        example: Asia/Yakutsk
+        type: string
+    type: object
+  model.AirportsResponse:
+    properties:
+      message:
+        example: ok
+        type: string
+      payload:
+        properties:
+          count:
+            example: 10
+            type: integer
+          rows:
+            items:
+              $ref: '#/definitions/model.Airport'
+            type: array
+        type: object
+    type: object
+  model.CheckInResponse:
+    properties:
+      message:
+        example: ok
+        type: string
+      payload:
+        properties:
+          boardingNo:
+            example: 376
+            type: integer
+          flightId:
+            example: 7343
+            type: integer
+          seatNo:
+            example: 11F
+            type: string
+          ticketNo:
+            example: _086b048c8144
+            type: string
+        type: object
+    type: object
+  model.CitiesResponse:
+    properties:
+      message:
+        example: ok
+        type: string
+      payload:
+        properties:
+          count:
+            example: 10
+            type: integer
+          rows:
+            items:
+              $ref: '#/definitions/model.City'
+            type: array
+        type: object
+    type: object
+  model.City:
+    properties:
+      city:
+        example: Братск
+        type: string
+    type: object
+  model.CreateBookingResponse:
+    properties:
+      message:
+        example: ok
+        type: string
+      payload:
+        properties:
+          bookRef:
+            example: _67429
+            type: string
+          tickets:
+            items:
+              $ref: '#/definitions/model.Ticket'
+            type: array
+          totalAmount:
+            example: 7700
+            type: number
+        type: object
+    type: object
+  model.Point:
+    properties:
+      latitude:
+        example: 62.093299865722656
+        type: number
+      longitude:
+        example: 129.77099609375
+        type: number
+    type: object
+  model.Response:
+    properties:
+      message:
+        example: message
+        type: string
+      payload:
+        example: "null"
+        type: string
+    type: object
+  model.Route:
+    properties:
+      airportPath:
+        example:
+        - SVO
+        - ROV
+        - DME
+        items:
+          type: string
+        type: array
+      flightIdPath:
+        example:
+        - 5445
+        - 12916
+        items:
+          type: number
+        type: array
+      flightNoPath:
+        example:
+        - PG0317
+        - PG0215
+        items:
+          type: string
+        type: array
+      scheduledArrival:
+        example: "2017-09-10T16:30:00Z"
+        type: string
+      scheduledDeparture:
+        example: "2017-09-10T13:45:00Z"
+        type: string
+      step:
+        example: 2
+        type: integer
+    type: object
+  model.RoutesResponse:
+    properties:
+      message:
+        example: ok
+        type: string
+      payload:
+        properties:
+          count:
+            example: 10
+            type: integer
+          rows:
+            items:
+              $ref: '#/definitions/model.Route'
+            type: array
+        type: object
+    type: object
+  model.ScheduleFlight:
+    properties:
+      airportName:
+        example: Сочи
+        type: string
+      arrivalTime:
+        example: "0000-01-01T17:00:00Z"
+        type: string
+      daysOfWeek:
+        example:
+        - 1
+        - 2
+        - 3
+        items:
+          type: number
+        type: array
+      departureTime:
+        example: "0000-01-01T17:00:00Z"
+        type: string
+      flightNo:
+        example: PG0013
+        type: string
+    type: object
+  model.ScheduleResponse:
+    properties:
+      message:
+        example: ok
+        type: string
+      payload:
+        properties:
+          count:
+            example: 10
+            type: integer
+          rows:
+            items:
+              $ref: '#/definitions/model.ScheduleFlight'
+            type: array
+        type: object
+    type: object
+  model.Ticket:
+    properties:
+      amount:
+        example: 7700
+        type: number
+      fareConditions:
+        example: Economy
+        type: string
+      flightId:
+        example: 7343
+        type: integer
+      ticketNo:
+        example: _086b048c8144
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API Server for Airlines Service (D_6 task for DPaS course)
+  title: Airlines Service
+  version: "1.0"
+paths:
+  /airports:
+    get:
+      description: |-
+        Supports pagination (limit, page params)
+        If you want to get airports in certain city pass 'city' parameter
+      parameters:
+      - description: city where airports are located
+        example: '"Якутск"'
+        in: query
+        name: city
+        type: string
+      - description: limit of received data, default=30
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: page of data that you want to receive, default=0
+        example: 2
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AirportsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get all available airports or in certain city
+      tags:
+      - airports
+  /booking:
+    post:
+      consumes:
+      - application/json
+      description: Actually, contact data is optional
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateBooking.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CreateBookingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Create a booking for a selected route for a single passenger
+      tags:
+      - booking
+  /check-in:
+    post:
+      consumes:
+      - application/json
+      description: Pass ticketNo and flightId to get your boarding pass
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CheckIn.Request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CheckInResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Online check-in for a flight
+      tags:
+      - check-in
+  /cities:
+    get:
+      description: Supports pagination (limit, page params)
+      parameters:
+      - description: limit of received data, default=120
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: page of data that you want to receive, default=0
+        example: 2
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CitiesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get all available cities
+      tags:
+      - cities
+  /routes:
+    get:
+      description: |-
+        Supports pagination (limit, page params)
+        You can limit the number of transfers using 'stepLimit' parameter, by default it will set to 'unbound'
+        Choose origin and destination points which can be an airport or a city
+        Choose fare conditions passing 'fareConditions' parameter
+        Choose departure date passing 'departureDate' parameter
+      parameters:
+      - description: origin airport or city
+        example: '"SVO"'
+        in: query
+        name: origin
+        required: true
+        type: string
+      - description: destination airport or city
+        example: '"DME"'
+        in: query
+        name: destination
+        required: true
+        type: string
+      - description: direction
+        enum:
+        - Economy
+        - Comfort
+        - Business
+        example: '"Economy"'
+        in: query
+        name: fareCondition
+        required: true
+        type: string
+      - description: direction
+        example: '"2017-09-10"'
+        in: query
+        name: departureDate
+        required: true
+        type: string
+      - description: limit the number of transfers, default=unbound
+        example: '"1"'
+        in: query
+        name: stepLimit
+        type: string
+      - description: limit of received data, default=30
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: page of data that you want to receive, default=0
+        example: 3
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RoutesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get routes connecting two points (airports or cities) in some date
+        (between date and tomorrow's date)
+      tags:
+      - flights
+  /schedule:
+    get:
+      description: |-
+        Supports pagination (limit, page params)
+        Choose direction using 'direction' parameter
+        Choose airport passing 'airportCode' parameter
+      parameters:
+      - description: direction
+        enum:
+        - inbound
+        - outbound
+        example: '"inbound"'
+        in: query
+        name: direction
+        required: true
+        type: string
+      - description: airport code
+        example: '"SVO"'
+        in: query
+        name: airportCode
+        required: true
+        type: string
+      - description: limit of received data, default=30
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: page of data that you want to receive, default=0
+        example: 3
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ScheduleResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get schedule for certain airport
+      tags:
+      - flights
+swagger: "2.0"

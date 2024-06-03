@@ -15,13 +15,13 @@ type City interface {
 }
 
 type Create interface {
-	CreateBooking(bookDate time.Time, passengerName, fareCondition string, flightIds []int, contactData model.JSON) (model.Booking, error)
+	CreateBooking(bookDate time.Time, passengerName, fareConditions string, flightIds []int, contactData model.JSON) (model.Booking, error)
 	CheckIn(ticketNo string, flightId int) (model.BoardingPass, error)
 }
 
 type Flight interface {
 	GetSchedule(limit, page, direction, airportCode string) (int, []model.ScheduleFlight, error)
-	GetRoutes(limit, page, origin, destination, fareCondition string, departureDate time.Time, stepLimit int) (int, []model.Route, error)
+	GetRoutes(limit, page, origin, destination, fareConditions string, departureDate time.Time, stepLimit int) (int, []model.Route, error)
 }
 
 type Service struct {

@@ -119,7 +119,7 @@ func (r *FlightPostgres) GetAirportCodeFromCity(city string) (string, error) {
 }
 
 func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destination,
-	fareCondition string, departureDate time.Time) (int, []model.Route, error) {
+	fareConditions string, departureDate time.Time) (int, []model.Route, error) {
 
 	date := fmt.Sprintf("%d-%d-%d", departureDate.Year(), departureDate.Month(), departureDate.Day())
 
@@ -131,7 +131,7 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 						WHERE s.fare_conditions='%s'
 						AND f.scheduled_departure >= '%s'::DATE
 						AND f.scheduled_departure <= date_trunc('day', '%s'::DATE + 1)
-						AND f.status <> 'Cancelled'`, fareCondition, date, date)
+						AND f.status <> 'Cancelled'`, fareConditions, date, date)
 
 	queryCreateIndexDeparture := `CREATE INDEX IF NOT EXISTS idx_departure_airport_my_routes ON flights(departure_airport)`
 	queryCreateIndexArrival := `CREATE INDEX IF NOT EXISTS idx_arrival_airport_my_routes ON flights(arrival_airport)`

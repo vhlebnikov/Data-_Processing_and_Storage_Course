@@ -16,7 +16,7 @@ func NewCreateService(repo repository.Create) *CreateService {
 	return &CreateService{repo: repo}
 }
 
-func (s *CreateService) CreateBooking(bookDate time.Time, passengerName, fareCondition string, flightIds []int,
+func (s *CreateService) CreateBooking(bookDate time.Time, passengerName, fareConditions string, flightIds []int,
 	contactData model.JSON) (model.Booking, error) {
 
 	bookRef := "_" + uuid.New().String()[1:6]
@@ -27,7 +27,7 @@ func (s *CreateService) CreateBooking(bookDate time.Time, passengerName, fareCon
 		passengerIds = append(passengerIds, "_"+strings.Replace(uuid.New().String(), "-", "", -1)[1:20])
 	}
 
-	ticketsPrices, err := s.repo.GetFlightsPrices(flightIds, fareCondition)
+	ticketsPrices, err := s.repo.GetFlightsPrices(flightIds, fareConditions)
 	if err != nil {
 		return model.Booking{}, err
 	}
@@ -40,7 +40,7 @@ func (s *CreateService) CreateBooking(bookDate time.Time, passengerName, fareCon
 		return model.Booking{}, err
 	}
 
-	tickets, err := s.repo.CreateTickets(ticketsPrices, bookRef, fareCondition, passengerName,
+	tickets, err := s.repo.CreateTickets(ticketsPrices, bookRef, fareConditions, passengerName,
 		passengerIds, ticketsNo, contactData)
 	if err != nil {
 		return model.Booking{}, err
