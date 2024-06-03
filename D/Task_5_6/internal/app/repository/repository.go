@@ -18,6 +18,10 @@ type Create interface {
 	GetFlightsPrices(flightsIds []int, fareCondition string) ([]model.FlightPrice, error)
 	CreateBooking(bookDate time.Time, totalAmount float64, bookRef string) error
 	CreateTickets(flightPrices []model.FlightPrice, bookRef, fareCondition, passengerName string, passengerIds, ticketsNo []string, contactData model.JSON) ([]model.Ticket, error)
+	GetFareConditions(ticketNo string, flightId int) (string, error)
+	GetFreeSeatForFlight(flightId int, fareConditions string) (string, error)
+	GetNextBoardingNo() (int, error)
+	CreateBoardingPass(boardingNo, flightId int, seatNo, ticketNo string) (model.BoardingPass, error)
 }
 
 type Flight interface {

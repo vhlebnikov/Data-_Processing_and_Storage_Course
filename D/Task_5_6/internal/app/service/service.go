@@ -16,6 +16,7 @@ type City interface {
 
 type Create interface {
 	CreateBooking(bookDate time.Time, passengerName, fareCondition string, flightIds []int, contactData model.JSON) (model.Booking, error)
+	CheckIn(ticketNo string, flightId int) (model.BoardingPass, error)
 }
 
 type Flight interface {

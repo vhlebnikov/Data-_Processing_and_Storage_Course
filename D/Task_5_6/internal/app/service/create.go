@@ -52,3 +52,27 @@ func (s *CreateService) CreateBooking(bookDate time.Time, passengerName, fareCon
 		Tickets:     tickets,
 	}, nil
 }
+
+// просто поприкалываться оставлю, аналог static в Go
+func getBoardingNo() func() int {
+	startNo := 374
+	return func() int {
+		startNo += 1
+		return startNo
+	}
+}
+
+func (s *CreateService) CheckIn(ticketNo string, flightId int) (model.BoardingPass, error) {
+	fareConditions, err := s.repo.GetFareConditions(ticketNo, flightId)
+	if err != nil {
+		return model.BoardingPass{}, err
+	}
+
+	seatNo, err := s.repo.GetFreeSeatForFlight(flightId, fareConditions)
+	// почему, используя Postgres, нельзя было по-человечски чисто сделать sequence на такого рода колнки...
+	boardingNo, err := s.repo.GetNextBoardingNo()
+	if err != nil {
+		return model.BoardingPass{}, err
+	}
+	return s.repo.CreateBoardingPass(boardingNo, flightId, seatNo, ticketNo)
+}

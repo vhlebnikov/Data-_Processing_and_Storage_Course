@@ -48,6 +48,27 @@ func (h *Handler) CreateBooking(c *gin.Context) {
 
 }
 
+// CheckIn Стоит сказать, что оказывается один ticket_no может быть связан с несколькими
+// flight_id, именно по этой причине мне нужно передавать оба этих значения
 func (h *Handler) CheckIn(c *gin.Context) {
+	var request struct {
+		TicketNo string `json:"ticketNo" binding:"required"`
+		FlightId int    `json:"flightId" binding:"required"`
+	}
 
+	if err := c.ShouldBindJSON(&request); err != nil {
+		myerr.New(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	boardingPass, err := h.services.Create.CheckIn(request.TicketNo, request.FlightId)
+	if err != nil {
+		myerr.New(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Message: "ok",
+		Payload: boardingPass,
+	})
 }

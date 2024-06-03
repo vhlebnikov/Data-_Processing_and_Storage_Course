@@ -97,3 +97,10 @@ func (j JSON) Scan(value interface{}) error {
 	}
 	return json.Unmarshal(b, &j)
 }
+
+type BoardingPass struct {
+	BoardingNo int    `json:"boardingNo" db:"boarding_no"`
+	SeatNo     string `json:"seatNo" db:"seat_no"`
+	TicketNo   string `json:"ticketNo" db:"ticket_no"`
+	FlightId   int    `json:"flightId" db:"flight_id"`
+}
