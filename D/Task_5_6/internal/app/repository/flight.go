@@ -123,8 +123,8 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 
 	date := fmt.Sprintf("%d-%d-%d", departureDate.Year(), departureDate.Month(), departureDate.Day())
 
-	queryCreateView := fmt.Sprintf(`CREATE OR REPLACE VIEW my_routes(flight_no, departure_airport, arrival_airport, scheduled_departure, scheduled_arrival) AS
-						SELECT DISTINCT flight_no, departure_airport, arrival_airport, scheduled_departure, scheduled_arrival
+	queryCreateView := fmt.Sprintf(`CREATE OR REPLACE VIEW my_routes(flight_id, flight_no, departure_airport, arrival_airport, scheduled_departure, scheduled_arrival) AS
+						SELECT DISTINCT flight_id, flight_no, departure_airport, arrival_airport, scheduled_departure, scheduled_arrival
 						FROM flights f
 						JOIN seats s
 						  ON f.aircraft_code = s.aircraft_code
@@ -141,7 +141,8 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 							departure_airport, arrival_airport, scheduled_departure, scheduled_arrival,
 							1 AS step,
 							ARRAY[departure_airport, arrival_airport]::VARCHAR[] AS airport_path,
-							ARRAY[flight_no]::VARCHAR[] AS flight_no_path
+							ARRAY[flight_no]::VARCHAR[] AS flight_no_path,
+							ARRAY[flight_id::VARCHAR]::VARCHAR[] as flight_id_path
 						FROM my_routes
 						WHERE departure_airport=$1
 					
@@ -151,7 +152,8 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 							r.departure_airport, r.arrival_airport, fp.scheduled_departure, r.scheduled_arrival,
 							fp.step + 1,
 							(fp.airport_path || r.arrival_airport)::VARCHAR[],
-							(fp.flight_no_path || r.flight_no)::VARCHAR[]
+							(fp.flight_no_path || r.flight_no)::VARCHAR[],
+							(fp.flight_id_path || r.flight_id::VARCHAR)::VARCHAR[]
 						FROM my_routes r
 						JOIN flight_paths fp ON r.departure_airport=fp.arrival_airport
 						WHERE fp.step < $2
@@ -162,6 +164,7 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 					SELECT airport_path,
 						   step,
 						   flight_no_path,
+						   flight_id_path,
 						   scheduled_departure,
 						   scheduled_arrival
 					FROM flight_paths
@@ -173,7 +176,8 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 							departure_airport, arrival_airport, scheduled_departure, scheduled_arrival,
 							1 AS step,
 							ARRAY[departure_airport, arrival_airport]::VARCHAR[] AS airport_path,
-							ARRAY[flight_no]::VARCHAR[] AS flight_no_path
+							ARRAY[flight_no]::VARCHAR[] AS flight_no_path,
+							ARRAY[flight_id::VARCHAR]::VARCHAR[] as flight_id_path
 						FROM my_routes
 						WHERE departure_airport=$1
 					
@@ -183,7 +187,8 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 							r.departure_airport, r.arrival_airport, fp.scheduled_departure, r.scheduled_arrival,
 							fp.step + 1,
 							(fp.airport_path || r.arrival_airport)::VARCHAR[],
-							(fp.flight_no_path || r.flight_no)::VARCHAR[]
+							(fp.flight_no_path || r.flight_no)::VARCHAR[],
+							(fp.flight_id_path || r.flight_id::VARCHAR)::VARCHAR[]
 						FROM my_routes r
 						JOIN flight_paths fp ON r.departure_airport=fp.arrival_airport
 						WHERE fp.step < $2

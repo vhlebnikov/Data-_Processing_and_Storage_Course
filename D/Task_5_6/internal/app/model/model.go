@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
@@ -58,7 +60,40 @@ type ScheduleFlight struct {
 type Route struct {
 	AirportPath        pq.StringArray `json:"airportPath" db:"airport_path"`
 	FlightNoPath       pq.StringArray `json:"flightNoPath" db:"flight_no_path"`
+	FlightIdPath       pq.Int64Array  `json:"flightIdPath" db:"flight_id_path"`
 	Step               int            `json:"step" db:"step"`
 	ScheduledDeparture time.Time      `json:"scheduledDeparture" db:"scheduled_departure"`
 	ScheduledArrival   time.Time      `json:"scheduledArrival" db:"scheduled_arrival"`
+}
+
+type Booking struct {
+	BookRef     string   `json:"bookRef" db:"book_ref"`
+	TotalAmount float64  `json:"totalAmount" db:"total_amount"`
+	Tickets     []Ticket `json:"tickets"`
+}
+
+type Ticket struct {
+	TicketNo       string  `json:"ticketNo" db:"ticket_no"`
+	FareConditions string  `json:"fareConditions" db:"fare_conditions"`
+	Amount         float64 `json:"amount" db:"amount"`
+	FlightId       int     `json:"flightId" db:"flight_id"`
+}
+
+type FlightPrice struct {
+	FlightId int     `db:"flight_id"`
+	Amount   float64 `db:"amount"`
+}
+
+type JSON map[string]any
+
+func (j JSON) Value() (driver.Value, error) {
+	return json.Marshal(j)
+}
+
+func (j JSON) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, &j)
 }

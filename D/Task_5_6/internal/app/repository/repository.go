@@ -15,6 +15,9 @@ type City interface {
 }
 
 type Create interface {
+	GetFlightsPrices(flightsIds []int, fareCondition string) ([]model.FlightPrice, error)
+	CreateBooking(bookDate time.Time, totalAmount float64, bookRef string) error
+	CreateTickets(flightPrices []model.FlightPrice, bookRef, fareCondition, passengerName string, passengerIds, ticketsNo []string, contactData model.JSON) ([]model.Ticket, error)
 }
 
 type Flight interface {
