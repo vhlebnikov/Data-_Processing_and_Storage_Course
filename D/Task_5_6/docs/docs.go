@@ -27,6 +27,17 @@ const docTemplate = `{
                 "summary": "Get all available airports or in certain city",
                 "parameters": [
                     {
+                        "enum": [
+                            "en",
+                            "ru"
+                        ],
+                        "type": "string",
+                        "example": "ru",
+                        "description": "language of data to receive, default='ru'",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "example": "\"Якутск\"",
                         "description": "city where airports are located",
@@ -174,6 +185,17 @@ const docTemplate = `{
                 "summary": "Get all available cities",
                 "parameters": [
                     {
+                        "enum": [
+                            "en",
+                            "ru"
+                        ],
+                        "type": "string",
+                        "example": "ru",
+                        "description": "language of data to receive, default='ru'",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "example": 10,
                         "description": "limit of received data, default=120",
@@ -246,7 +268,7 @@ const docTemplate = `{
                         "type": "string",
                         "example": "\"Economy\"",
                         "description": "direction",
-                        "name": "fareCondition",
+                        "name": "fareConditions",
                         "in": "query",
                         "required": true
                     },

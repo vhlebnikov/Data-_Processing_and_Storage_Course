@@ -273,6 +273,14 @@ paths:
         Supports pagination (limit, page params)
         If you want to get airports in certain city pass 'city' parameter
       parameters:
+      - description: language of data to receive, default='ru'
+        enum:
+        - en
+        - ru
+        example: ru
+        in: query
+        name: lang
+        type: string
       - description: city where airports are located
         example: '"Якутск"'
         in: query
@@ -370,6 +378,14 @@ paths:
     get:
       description: Supports pagination (limit, page params)
       parameters:
+      - description: language of data to receive, default='ru'
+        enum:
+        - en
+        - ru
+        example: ru
+        in: query
+        name: lang
+        type: string
       - description: limit of received data, default=120
         example: 10
         in: query
@@ -426,7 +442,7 @@ paths:
         - Business
         example: '"Economy"'
         in: query
-        name: fareCondition
+        name: fareConditions
         required: true
         type: string
       - description: direction

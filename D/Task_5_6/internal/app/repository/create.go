@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/vhlebnikov/Data_Processing_and_Storage_Course/internal/app/model"
 	"time"
@@ -16,21 +17,49 @@ func NewCreatePostgres(db *sqlx.DB) *CreatePostgres {
 	return &CreatePostgres{db: db}
 }
 
-func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareConditions string) ([]model.FlightPrice, error) {
+func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareConditions string, bookDate time.Time) ([]model.FlightPrice, error) {
 	query := `SELECT f.flight_id, MIN(tf.amount) AS amount
 				FROM flights f
 				JOIN ticket_flights tf
 				ON f.flight_id=tf.flight_id
-				WHERE f.status = 'Scheduled'
-				AND f.flight_id=$1
+				WHERE f.flight_id=$1
 				AND tf.fare_conditions=$2
 				GROUP BY f.flight_id, tf.fare_conditions`
+
+	queryCreateFlights := fmt.Sprintf(`INSERT INTO flights (flight_no, scheduled_departure, scheduled_arrival, departure_airport, arrival_airport,
+                     		status, aircraft_code)
+							SELECT flight_no,
+								   MAKE_TIMESTAMP(%d::INT, %d::INT, %d::INT,
+									   EXTRACT(HOUR FROM scheduled_departure)::INT,
+									   EXTRACT(MINUTE FROM scheduled_departure)::INT,
+									   EXTRACT(SECOND FROM scheduled_departure)::DOUBLE PRECISION) AS scheduled_departure,
+								   MAKE_TIMESTAMP(%d::INT, %d::INT, %d::INT,
+									   EXTRACT(HOUR FROM scheduled_arrival)::INT,
+									   EXTRACT(MINUTE FROM scheduled_arrival)::INT,
+									   EXTRACT(SECOND FROM scheduled_arrival)::DOUBLE PRECISION) AS scheduled_arrival,
+								   departure_airport, arrival_airport, status, aircraft_code
+							FROM flights
+							WHERE flight_id=$1
+							RETURNING flight_id`, bookDate.Year(), bookDate.Month(), bookDate.Day(),
+		bookDate.Year(), bookDate.Month(), bookDate.Day())
 
 	tx, err := r.db.Beginx()
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
+
+	newFlightIds := make([]int, 0, len(flightsIds))
+	if bookDate.Year() > 2017 {
+		for _, flightId := range flightsIds {
+			var id int
+			err = tx.Get(&id, queryCreateFlights, flightId)
+			if err != nil {
+				return nil, err
+			}
+			newFlightIds = append(newFlightIds, id)
+		}
+	}
 
 	prices := make([]model.FlightPrice, 0, len(flightsIds))
 	stmt, err := tx.Preparex(query)
@@ -39,7 +68,7 @@ func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareConditions strin
 	}
 	defer stmt.Close()
 
-	for _, id := range flightsIds {
+	for i, id := range flightsIds {
 		var price model.FlightPrice
 		err = stmt.Get(&price, id, fareConditions)
 		if err != nil {
@@ -51,6 +80,9 @@ func (r *CreatePostgres) GetFlightsPrices(flightsIds []int, fareConditions strin
 			} else {
 				return nil, err
 			}
+		}
+		if bookDate.Year() > 2017 {
+			price.FlightId = newFlightIds[i]
 		}
 		prices = append(prices, price)
 	}

@@ -8,10 +8,12 @@ import (
 
 type Airport interface {
 	GetAirports(limit, page, city string) (int, []model.Airport, error)
+	SetLanguage(language string) error
 }
 
 type City interface {
 	GetAllCities(limit, page string) (int, []model.City, error)
+	SetLanguage(language string) error
 }
 
 type Create interface {

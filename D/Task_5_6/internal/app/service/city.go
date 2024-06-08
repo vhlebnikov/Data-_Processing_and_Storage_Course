@@ -29,3 +29,7 @@ func (s *CityService) GetAllCities(limit, page string) (int, []model.City, error
 
 	return s.repo.GetAllCities(limitInt, offset)
 }
+
+func (s *CityService) SetLanguage(language string) error {
+	return s.repo.SetLanguage(language)
+}

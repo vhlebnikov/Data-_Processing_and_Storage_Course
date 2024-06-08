@@ -77,7 +77,7 @@ func (h *Handler) GetSchedule(c *gin.Context) {
 //	@Produce		json
 //	@Param			origin			query		string	true	"origin airport or city"							example("SVO")
 //	@Param			destination		query		string	true	"destination airport or city"						example("DME")
-//	@Param			fareCondition	query		string	true	"direction"											example("Economy")	Enums(Economy, Comfort, Business)
+//	@Param			fareConditions	query		string	true	"direction"											example("Economy")	Enums(Economy, Comfort, Business)
 //	@Param			departureDate	query		string	true	"direction"											example("2017-09-10")
 //	@Param			stepLimit		query		string	false	"limit the number of transfers, default=unbound"	example("1")
 //	@Param			limit			query		int		false	"limit of received data, default=30"				example(10)

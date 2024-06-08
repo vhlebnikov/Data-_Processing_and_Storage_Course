@@ -27,7 +27,7 @@ func (s *CreateService) CreateBooking(bookDate time.Time, passengerName, fareCon
 		passengerIds = append(passengerIds, "_"+strings.Replace(uuid.New().String(), "-", "", -1)[1:20])
 	}
 
-	ticketsPrices, err := s.repo.GetFlightsPrices(flightIds, fareConditions)
+	ticketsPrices, err := s.repo.GetFlightsPrices(flightIds, fareConditions, bookDate)
 	if err != nil {
 		return model.Booking{}, err
 	}

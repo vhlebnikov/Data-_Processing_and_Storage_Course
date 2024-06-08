@@ -8,14 +8,16 @@ import (
 
 type Airport interface {
 	GetAirports(limit, offset int, city string) (int, []model.Airport, error)
+	SetLanguage(language string) error
 }
 
 type City interface {
 	GetAllCities(limit, offset int) (int, []model.City, error)
+	SetLanguage(language string) error
 }
 
 type Create interface {
-	GetFlightsPrices(flightsIds []int, fareConditions string) ([]model.FlightPrice, error)
+	GetFlightsPrices(flightsIds []int, fareConditions string, bookDate time.Time) ([]model.FlightPrice, error)
 	CreateBooking(bookDate time.Time, totalAmount float64, bookRef string) error
 	CreateTickets(flightPrices []model.FlightPrice, bookRef, fareConditions, passengerName string, passengerIds, ticketsNo []string, contactData model.JSON) ([]model.Ticket, error)
 	GetFareConditions(ticketNo string, flightId int) (string, error)

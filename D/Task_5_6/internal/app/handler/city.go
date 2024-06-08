@@ -13,12 +13,26 @@ import (
 //	@Description	Supports pagination (limit, page params)
 //	@Tags			cities
 //	@Produce		json
-//	@Param			limit	query		int	false	"limit of received data, default=120"				example(10)
-//	@Param			page	query		int	false	"page of data that you want to receive, default=0"	example(2)
+//	@Param			lang	query		string	false	"language of data to receive, default='ru'"			Enums(en, ru)	example(ru)
+//	@Param			limit	query		int		false	"limit of received data, default=120"				example(10)
+//	@Param			page	query		int		false	"page of data that you want to receive, default=0"	example(2)
 //	@Success		200		{object}	model.CitiesResponse
 //	@Failure		400,500	{object}	model.Response
 //	@Router			/cities [get]
 func (h *Handler) GetCities(c *gin.Context) {
+	lang := c.Query("lang")
+	if lang == "" {
+		lang = "ru"
+	}
+	if lang != "ru" && lang != "en" {
+		myerr.New(c, http.StatusBadRequest, "unknown 'lang' value")
+		return
+	}
+	if err := h.services.Airport.SetLanguage(lang); err != nil {
+		myerr.New(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	limit := c.Query("limit")
 	if limit == "" {
 		limit = "120"

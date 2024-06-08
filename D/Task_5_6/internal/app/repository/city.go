@@ -40,3 +40,9 @@ func (r *CityPostgres) GetAllCities(limit, offset int) (int, []model.City, error
 
 	return count, cities, nil
 }
+
+func (r *CityPostgres) SetLanguage(language string) error {
+	query := `SELECT set_config('bookings.lang', $1, false)`
+	_, err := r.db.Exec(query, language)
+	return err
+}

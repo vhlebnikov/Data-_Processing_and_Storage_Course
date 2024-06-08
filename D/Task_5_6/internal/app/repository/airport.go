@@ -60,3 +60,9 @@ func (r *AirportPostgres) GetAirports(limit, offset int, city string) (int, []mo
 
 	return count, airports, nil
 }
+
+func (r *AirportPostgres) SetLanguage(language string) error {
+	query := `SELECT set_config('bookings.lang', $1, false)`
+	_, err := r.db.Exec(query, language)
+	return err
+}

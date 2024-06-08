@@ -123,24 +123,33 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 
 	date := fmt.Sprintf("%d-%d-%d", departureDate.Year(), departureDate.Month(), departureDate.Day())
 
-	queryCreateView := fmt.Sprintf(`CREATE OR REPLACE VIEW my_routes(flight_id, flight_no, departure_airport, arrival_airport, scheduled_departure, scheduled_arrival) AS
-						SELECT DISTINCT flight_id, flight_no, departure_airport, arrival_airport, scheduled_departure, scheduled_arrival
-						FROM flights f
-						JOIN seats s
-						  ON f.aircraft_code = s.aircraft_code
-						WHERE s.fare_conditions='%s'
-						AND f.scheduled_departure >= '%s'::DATE
-						AND f.scheduled_departure <= date_trunc('day', '%s'::DATE + 1)
-						AND f.status <> 'Cancelled'`, fareConditions, date, date)
+	queryCreateView := fmt.Sprintf(`CREATE OR REPLACE VIEW my_routes(flight_no, flight_id, departure_airport,
+											departure_city, arrival_airport, arrival_city, scheduled_departure,
+											scheduled_arrival) AS
+											SELECT f.flight_no, f.flight_id,
+												   f.departure_airport, f.departure_city, f.arrival_airport, f.arrival_city,
+												   f.scheduled_departure, f.scheduled_arrival
+											FROM flights_v f
+											JOIN ticket_flights tf ON f.flight_id = tf.flight_id
+											WHERE tf.fare_conditions = '%s'
+											AND f.status <> 'Canceled'
+											AND EXTRACT(DOW FROM f.scheduled_departure) = EXTRACT(DOW FROM '%s'::DATE)
+											AND EXTRACT(WEEK FROM f.scheduled_departure) = EXTRACT(WEEK FROM '%s'::DATE)
+											GROUP BY f.flight_no, f.flight_id,
+													 f.departure_airport, f.departure_city, f.arrival_airport, f.arrival_city,
+													 f.scheduled_departure, f.scheduled_arrival
+											ORDER BY f.flight_no, EXTRACT(DOW FROM f.scheduled_departure), scheduled_departure`,
+		fareConditions, date, date)
 
 	queryCreateIndexDeparture := `CREATE INDEX IF NOT EXISTS idx_departure_airport_my_routes ON flights(departure_airport)`
 	queryCreateIndexArrival := `CREATE INDEX IF NOT EXISTS idx_arrival_airport_my_routes ON flights(arrival_airport)`
 
-	queryGetRoutes := `WITH RECURSIVE flight_paths AS (
+	queryGetRoutes := fmt.Sprintf(`WITH RECURSIVE flight_paths AS (
 						SELECT
 							departure_airport, arrival_airport, scheduled_departure, scheduled_arrival,
 							1 AS step,
 							ARRAY[departure_airport, arrival_airport]::VARCHAR[] AS airport_path,
+							ARRAY[departure_city, arrival_city]::VARCHAR[] AS city_path,
 							ARRAY[flight_no]::VARCHAR[] AS flight_no_path,
 							ARRAY[flight_id::VARCHAR]::VARCHAR[] as flight_id_path
 						FROM my_routes
@@ -152,6 +161,7 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 							r.departure_airport, r.arrival_airport, fp.scheduled_departure, r.scheduled_arrival,
 							fp.step + 1,
 							(fp.airport_path || r.arrival_airport)::VARCHAR[],
+							(fp.city_path || r.arrival_city)::VARCHAR[],
 							(fp.flight_no_path || r.flight_no)::VARCHAR[],
 							(fp.flight_id_path || r.flight_id::VARCHAR)::VARCHAR[]
 						FROM my_routes r
@@ -159,23 +169,28 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 						WHERE fp.step < $2
 						AND r.scheduled_departure >= fp.scheduled_arrival
 						AND r.arrival_airport <> ALL(fp.airport_path)
+						AND r.arrival_city <> ALL(fp.city_path)
 					)
 					
 					SELECT airport_path,
 						   step,
 						   flight_no_path,
 						   flight_id_path,
-						   scheduled_departure,
-						   scheduled_arrival
+						   MAKE_TIMESTAMP(%d::INT, %d::INT, %d::INT, EXTRACT(HOUR FROM scheduled_departure)::INT, 
+						   EXTRACT(MINUTE FROM scheduled_departure)::INT, EXTRACT(SECOND FROM scheduled_departure)::DOUBLE PRECISION) AS scheduled_departure,
+						   MAKE_TIMESTAMP(%d::INT, %d::INT, %d::INT, EXTRACT(HOUR FROM scheduled_arrival)::INT, 
+						   EXTRACT(MINUTE FROM scheduled_arrival)::INT, EXTRACT(SECOND FROM scheduled_arrival)::DOUBLE PRECISION) AS scheduled_arrival
 					FROM flight_paths
 					WHERE arrival_airport = $3
-					LIMIT $4 OFFSET $5`
+					LIMIT $4 OFFSET $5`, departureDate.Year(), departureDate.Month(), departureDate.Day(),
+		departureDate.Year(), departureDate.Month(), departureDate.Day())
 
 	queryCount := `WITH RECURSIVE flight_paths AS (
 						SELECT
 							departure_airport, arrival_airport, scheduled_departure, scheduled_arrival,
 							1 AS step,
 							ARRAY[departure_airport, arrival_airport]::VARCHAR[] AS airport_path,
+							ARRAY[departure_city, arrival_city]::VARCHAR[] AS city_path,
 							ARRAY[flight_no]::VARCHAR[] AS flight_no_path,
 							ARRAY[flight_id::VARCHAR]::VARCHAR[] as flight_id_path
 						FROM my_routes
@@ -187,6 +202,7 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 							r.departure_airport, r.arrival_airport, fp.scheduled_departure, r.scheduled_arrival,
 							fp.step + 1,
 							(fp.airport_path || r.arrival_airport)::VARCHAR[],
+							(fp.city_path || r.arrival_city)::VARCHAR[],
 							(fp.flight_no_path || r.flight_no)::VARCHAR[],
 							(fp.flight_id_path || r.flight_id::VARCHAR)::VARCHAR[]
 						FROM my_routes r
@@ -194,6 +210,7 @@ func (r *FlightPostgres) GetRoutes(limit, offset, stepLimit int, origin, destina
 						WHERE fp.step < $2
 						AND r.scheduled_departure >= fp.scheduled_arrival
 						AND r.arrival_airport <> ALL(fp.airport_path)
+						AND r.arrival_city <> ALL(fp.city_path)
 					)
 					
 					SELECT COUNT(*)

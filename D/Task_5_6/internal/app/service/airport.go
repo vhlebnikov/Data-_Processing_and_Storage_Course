@@ -33,3 +33,7 @@ func (s *AirportService) GetAirports(limit, page, city string) (int, []model.Air
 
 	return count, airports, nil
 }
+
+func (s *AirportService) SetLanguage(language string) error {
+	return s.repo.SetLanguage(language)
+}
