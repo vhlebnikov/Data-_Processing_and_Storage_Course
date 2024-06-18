@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS family;
+
+DROP TABLE IF EXISTS spouses;
+
+DROP TABLE IF EXISTS siblings;
+
+DROP TABLE IF EXISTS persons;
+
+DROP DOMAIN IF EXISTS gender_type;
