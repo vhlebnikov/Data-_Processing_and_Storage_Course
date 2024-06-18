@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  pg-db:
+    image: postgres:latest
+    container_name: pg-db
+    restart: unless-stopped
+    shm_size: 1G
+    volumes:
+      - ./postgres_data/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - dpas_db:/var/lib/postgresql/data
+    ports:
+      - "7899:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+
+volumes:
+  dpas_db:
