@@ -1,0 +1,766 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API Server for Airlines Service (D_6 task for DPaS course)",
+        "title": "Airlines Service",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/airports": {
+            "get": {
+                "description": "Supports pagination (limit, page params)\nIf you want to get airports in certain city pass 'city' parameter",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "airports"
+                ],
+                "summary": "Get all available airports or in certain city",
+                "parameters": [
+                    {
+                        "enum": [
+                            "en",
+                            "ru"
+                        ],
+                        "type": "string",
+                        "example": "ru",
+                        "description": "language of data to receive, default='ru'",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"Якутск\"",
+                        "description": "city where airports are located",
+                        "name": "city",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "limit of received data, default=30",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 2,
+                        "description": "page of data that you want to receive, default=0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AirportsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/booking": {
+            "post": {
+                "description": "Actually, contact data is optional",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "booking"
+                ],
+                "summary": "Create a booking for a selected route for a single passenger",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CreateBooking.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CreateBookingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/check-in": {
+            "post": {
+                "description": "Pass ticketNo and flightId to get your boarding pass",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "check-in"
+                ],
+                "summary": "Online check-in for a flight",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.CheckIn.Request"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CheckInResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/cities": {
+            "get": {
+                "description": "Supports pagination (limit, page params)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cities"
+                ],
+                "summary": "Get all available cities",
+                "parameters": [
+                    {
+                        "enum": [
+                            "en",
+                            "ru"
+                        ],
+                        "type": "string",
+                        "example": "ru",
+                        "description": "language of data to receive, default='ru'",
+                        "name": "lang",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "limit of received data, default=120",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 2,
+                        "description": "page of data that you want to receive, default=0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.CitiesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/routes": {
+            "get": {
+                "description": "Supports pagination (limit, page params)\nYou can limit the number of transfers using 'stepLimit' parameter, by default it will set to 'unbound'\nChoose origin and destination points which can be an airport or a city\nChoose fare conditions passing 'fareConditions' parameter\nChoose departure date passing 'departureDate' parameter",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flights"
+                ],
+                "summary": "Get routes connecting two points (airports or cities) in some date (between date and tomorrow's date)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "\"SVO\"",
+                        "description": "origin airport or city",
+                        "name": "origin",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"DME\"",
+                        "description": "destination airport or city",
+                        "name": "destination",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "Economy",
+                            "Comfort",
+                            "Business"
+                        ],
+                        "type": "string",
+                        "example": "\"Economy\"",
+                        "description": "direction",
+                        "name": "fareConditions",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"2017-09-10\"",
+                        "description": "direction",
+                        "name": "departureDate",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"1\"",
+                        "description": "limit the number of transfers, default=unbound",
+                        "name": "stepLimit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "limit of received data, default=30",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 3,
+                        "description": "page of data that you want to receive, default=0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.RoutesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/schedule": {
+            "get": {
+                "description": "Supports pagination (limit, page params)\nChoose direction using 'direction' parameter\nChoose airport passing 'airportCode' parameter",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flights"
+                ],
+                "summary": "Get schedule for certain airport",
+                "parameters": [
+                    {
+                        "enum": [
+                            "inbound",
+                            "outbound"
+                        ],
+                        "type": "string",
+                        "example": "\"inbound\"",
+                        "description": "direction",
+                        "name": "direction",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"SVO\"",
+                        "description": "airport code",
+                        "name": "airportCode",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "limit of received data, default=30",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "example": 3,
+                        "description": "page of data that you want to receive, default=0",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.ScheduleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handler.CheckIn.Request": {
+            "type": "object",
+            "required": [
+                "flightId",
+                "ticketNo"
+            ],
+            "properties": {
+                "flightId": {
+                    "type": "integer",
+                    "example": 7343
+                },
+                "ticketNo": {
+                    "type": "string",
+                    "example": "_086b048c8144"
+                }
+            }
+        },
+        "handler.CreateBooking.Request": {
+            "type": "object",
+            "required": [
+                "bookDate",
+                "fareConditions",
+                "flightIds",
+                "passengerName"
+            ],
+            "properties": {
+                "bookDate": {
+                    "type": "string",
+                    "example": "2017-09-10"
+                },
+                "contactData": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "email": "myemail@gmail.com",
+                        "phone": "+79123456789"
+                    }
+                },
+                "fareConditions": {
+                    "type": "string",
+                    "example": "Economy"
+                },
+                "flightIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "example": [
+                        7343,
+                        28480
+                    ]
+                },
+                "passengerName": {
+                    "type": "string",
+                    "example": "KHLEBNIKOV VADIM"
+                }
+            }
+        },
+        "model.Airport": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "example": "Якутск"
+                },
+                "code": {
+                    "type": "string",
+                    "example": "YKS"
+                },
+                "coordinates": {
+                    "$ref": "#/definitions/model.Point"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Якутск"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "Asia/Yakutsk"
+                }
+            }
+        },
+        "model.AirportsResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "payload": {
+                    "type": "object",
+                    "properties": {
+                        "count": {
+                            "type": "integer",
+                            "example": 10
+                        },
+                        "rows": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Airport"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "model.CheckInResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "payload": {
+                    "type": "object",
+                    "properties": {
+                        "boardingNo": {
+                            "type": "integer",
+                            "example": 376
+                        },
+                        "flightId": {
+                            "type": "integer",
+                            "example": 7343
+                        },
+                        "seatNo": {
+                            "type": "string",
+                            "example": "11F"
+                        },
+                        "ticketNo": {
+                            "type": "string",
+                            "example": "_086b048c8144"
+                        }
+                    }
+                }
+            }
+        },
+        "model.CitiesResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "payload": {
+                    "type": "object",
+                    "properties": {
+                        "count": {
+                            "type": "integer",
+                            "example": 10
+                        },
+                        "rows": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.City"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "model.City": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "example": "Братск"
+                }
+            }
+        },
+        "model.CreateBookingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "payload": {
+                    "type": "object",
+                    "properties": {
+                        "bookRef": {
+                            "type": "string",
+                            "example": "_67429"
+                        },
+                        "tickets": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Ticket"
+                            }
+                        },
+                        "totalAmount": {
+                            "type": "number",
+                            "example": 7700
+                        }
+                    }
+                }
+            }
+        },
+        "model.Point": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "type": "number",
+                    "example": 62.093299865722656
+                },
+                "longitude": {
+                    "type": "number",
+                    "example": 129.77099609375
+                }
+            }
+        },
+        "model.Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "message"
+                },
+                "payload": {
+                    "type": "string",
+                    "example": "null"
+                }
+            }
+        },
+        "model.Route": {
+            "type": "object",
+            "properties": {
+                "airportPath": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "SVO",
+                        "ROV",
+                        "DME"
+                    ]
+                },
+                "flightIdPath": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "example": [
+                        5445,
+                        12916
+                    ]
+                },
+                "flightNoPath": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "PG0317",
+                        "PG0215"
+                    ]
+                },
+                "scheduledArrival": {
+                    "type": "string",
+                    "example": "2017-09-10T16:30:00Z"
+                },
+                "scheduledDeparture": {
+                    "type": "string",
+                    "example": "2017-09-10T13:45:00Z"
+                },
+                "step": {
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "model.RoutesResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "payload": {
+                    "type": "object",
+                    "properties": {
+                        "count": {
+                            "type": "integer",
+                            "example": 10
+                        },
+                        "rows": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Route"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "model.ScheduleFlight": {
+            "type": "object",
+            "properties": {
+                "airportName": {
+                    "type": "string",
+                    "example": "Сочи"
+                },
+                "arrivalTime": {
+                    "type": "string",
+                    "example": "0000-01-01T17:00:00Z"
+                },
+                "daysOfWeek": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "example": [
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "departureTime": {
+                    "type": "string",
+                    "example": "0000-01-01T17:00:00Z"
+                },
+                "flightNo": {
+                    "type": "string",
+                    "example": "PG0013"
+                }
+            }
+        },
+        "model.ScheduleResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "ok"
+                },
+                "payload": {
+                    "type": "object",
+                    "properties": {
+                        "count": {
+                            "type": "integer",
+                            "example": 10
+                        },
+                        "rows": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.ScheduleFlight"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "model.Ticket": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 7700
+                },
+                "fareConditions": {
+                    "type": "string",
+                    "example": "Economy"
+                },
+                "flightId": {
+                    "type": "integer",
+                    "example": 7343
+                },
+                "ticketNo": {
+                    "type": "string",
+                    "example": "_086b048c8144"
+                }
+            }
+        }
+    }
+}
